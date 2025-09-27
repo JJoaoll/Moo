@@ -18,10 +18,10 @@ type SubProgram = Program
 
 data Program = Program
   { pImports  :: [SubProgram]
-  , pGlobals :: [GlobalDef]
-  , pConsts  :: [ConstDef]
-  , pFuns    :: [FunDef]
-  , pTypes   :: [TypeDef]
+  , pGlobals  :: [GlobalDef]
+  , pConsts   :: [ConstDef]
+  , pFuns     :: [FunDef]
+  , pTypes    :: [TypeDef]
   } deriving (Eq, Show)
 
 -- @global abelha: Int = fib(5)
