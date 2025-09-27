@@ -17,7 +17,7 @@ type Params = [Param]
 type SubProgram = Program
 
 data Program = Program
-  { imports  :: [SubProgram]
+  { pImports  :: [SubProgram]
   , pGlobals :: [GlobalDef]
   , pConsts  :: [ConstDef]
   , pFuns    :: [FunDef]
