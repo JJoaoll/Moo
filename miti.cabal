@@ -65,7 +65,7 @@ executable miti
     other-modules: 
         Utils,
         Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
-        Parser.Samples.Basic
+        Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:

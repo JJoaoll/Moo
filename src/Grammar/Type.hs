@@ -1,4 +1,5 @@
 {-# Language PatternSynonyms #-}
+{-# LANGUAGE OverloadedStrings #-}
 -- {-# LANGUAGE DuplicateRecordFields #-}
 
 module Grammar.Type where 

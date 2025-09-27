@@ -1,6 +1,9 @@
 module Utils where
 
-type Name = String
+import Data.Text
+
+-- type Name = String
+type Name = Text
 
 (|>) :: t1 -> (t1 -> t2) -> t2
 x |> f = f x

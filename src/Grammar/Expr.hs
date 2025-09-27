@@ -14,7 +14,7 @@ data Lit
 
 data Expr
   = ELit Lit
-  | EVar Name | Const Name | Global Name -- optimal
+  | EVar Name | EConst Name | EGlobal Name -- optimal
   | EUnOp UnOp Expr | EBinOp Expr BinOp Expr
   | EFunCall Name [Expr]
   deriving (Eq, Show)
