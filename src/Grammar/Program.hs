@@ -10,17 +10,29 @@ import Grammar.Sttm
 
 -- TODO: missing records && lens
 
+
 type Params = [Param]
 
+-- import ./Code (implicit ".meh"?)
+type SubProgram = Program
+
 data Program = Program
-  { pGlobals :: [Global]
+  { imports  :: [SubProgram]
+  , pGlobals :: [GlobalDef]
+  , pConsts  :: [ConstDef]
   , pFuns    :: [FunDef]
   , pTypes   :: [TypeDef]
   } deriving (Eq, Show)
 
--- global abelha: Int = fib(5)
-data Global =
+-- @global abelha: Int = fib(5)
+data GlobalDef =
   Global Name 
+  Type Expr
+  deriving (Eq, Show)
+
+-- <const> flag = "-hfsh--trace-show special"
+data ConstDef =
+  Const Name 
   Type Expr
   deriving (Eq, Show)
 
