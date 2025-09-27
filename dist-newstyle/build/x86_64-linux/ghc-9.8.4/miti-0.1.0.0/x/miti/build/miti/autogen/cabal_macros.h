@@ -20,6 +20,56 @@
   (major1) == 4 && (major2) <  19 || \
   (major1) == 4 && (major2) == 19 && (minor) <= 2)
 #endif /* MIN_VERSION_base */
+/* package containers-0.6.8 */
+#ifndef VERSION_containers
+#define VERSION_containers "0.6.8"
+#endif /* VERSION_containers */
+#ifndef MIN_VERSION_containers
+#define MIN_VERSION_containers(major1,major2,minor) (\
+  (major1) <  0 || \
+  (major1) == 0 && (major2) <  6 || \
+  (major1) == 0 && (major2) == 6 && (minor) <= 8)
+#endif /* MIN_VERSION_containers */
+/* package megaparsec-9.7.0 */
+#ifndef VERSION_megaparsec
+#define VERSION_megaparsec "9.7.0"
+#endif /* VERSION_megaparsec */
+#ifndef MIN_VERSION_megaparsec
+#define MIN_VERSION_megaparsec(major1,major2,minor) (\
+  (major1) <  9 || \
+  (major1) == 9 && (major2) <  7 || \
+  (major1) == 9 && (major2) == 7 && (minor) <= 0)
+#endif /* MIN_VERSION_megaparsec */
+/* package mtl-2.3.1 */
+#ifndef VERSION_mtl
+#define VERSION_mtl "2.3.1"
+#endif /* VERSION_mtl */
+#ifndef MIN_VERSION_mtl
+#define MIN_VERSION_mtl(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  3 || \
+  (major1) == 2 && (major2) == 3 && (minor) <= 1)
+#endif /* MIN_VERSION_mtl */
+/* package parser-combinators-1.3.0 */
+#ifndef VERSION_parser_combinators
+#define VERSION_parser_combinators "1.3.0"
+#endif /* VERSION_parser_combinators */
+#ifndef MIN_VERSION_parser_combinators
+#define MIN_VERSION_parser_combinators(major1,major2,minor) (\
+  (major1) <  1 || \
+  (major1) == 1 && (major2) <  3 || \
+  (major1) == 1 && (major2) == 3 && (minor) <= 0)
+#endif /* MIN_VERSION_parser_combinators */
+/* package text-2.1.1 */
+#ifndef VERSION_text
+#define VERSION_text "2.1.1"
+#endif /* VERSION_text */
+#ifndef MIN_VERSION_text
+#define MIN_VERSION_text(major1,major2,minor) (\
+  (major1) <  2 || \
+  (major1) == 2 && (major2) <  1 || \
+  (major1) == 2 && (major2) == 1 && (minor) <= 1)
+#endif /* MIN_VERSION_text */
 
 /* tool gcc-14.3.0 */
 #ifndef TOOL_VERSION_gcc
