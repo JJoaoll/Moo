@@ -13,7 +13,7 @@ import Utils
 import qualified Data.List as L
 import Control.Applicative
 
-import Data.Text
+import Data.Text ( Text )  
 
 -- ScopeLevel
 type ScopeLevel = Int
@@ -48,22 +48,6 @@ data Error
   | PatternNotFound Msg 
   deriving (Eq, Show)
 
-{- 
-  fn sumToAll (n: Int, xs: List(Int)) do
-    xs = match xs with
-      Nil -> Nil
-      Cons(k,ks) -> Cons(k+n, sumToAll(n, ks))
-    end-match
-
-    return xs
-
-  end-sumToAll
--} 
-
--- 1. Colocar variaveis na stack
--- 2. Analisar sttmt por sttmt 💀💀
-
-
 ---- Finders ----
 
 findDecl :: FunContext -> Name -> Maybe Decl
@@ -94,10 +78,12 @@ findConstDef FunCtx{ctxConsts} name
   = L.find (kName ||> (==name)) ctxConsts
 
 -- needs a fix
--- findConstrAndTypeDefsByName :: FunContext -> Name -> Maybe (ConstrDef, TypeDef)
--- findConstrAndTypeDefsByName FunCtx{ctxTypeDefs} constrName = do
---   typeDef  <- L.find (tConstrs ||> has constrName) ctxTypeDefs
---   cnstrDef <- L.find (cName ||> (==constrName)) (tConstrs typeDef)
---   pure (cnstrDef, typeDef)
+findConstrAndTypeDefsByName :: FunContext -> Name -> Maybe (ConstrDef, TypeDef)
+findConstrAndTypeDefsByName FunCtx{ctxTypeDefs} constrName = do
 
---   where has name = any $ cName ||> (==name)
+  typeDef  <- L.find (tConstrs ||> has constrName) ctxTypeDefs
+  cnstrDef <- L.find (cName ||> (==constrName)) (tConstrs typeDef)
+  pure (cnstrDef, typeDef)
+
+  where 
+    has name = L.any (cName ||> (== name)) 
