@@ -25,16 +25,19 @@ data Program = Program
   } deriving (Eq, Show)
 
 -- @global abelha: Int = fib(5)
-data GlobalDef =
-  Global Name 
-  Type Expr
-  deriving (Eq, Show)
+data GlobalDef = Global 
+  { gName :: Name
+  , gExpr :: Expr 
+  , gType :: Type 
+  } deriving (Eq, Show)
+
 
 -- <const> flag = "-hfsh--trace-show special"
-data ConstDef =
-  Const Name 
-  Type Expr
-  deriving (Eq, Show)
+data ConstDef = Const 
+  { kName :: Name
+  , kType :: Type
+  , kVal  :: Expr -- SHOULD BE A LITERAL
+  } deriving (Eq, Show)
 
 data Param = Param
   { pName :: Name

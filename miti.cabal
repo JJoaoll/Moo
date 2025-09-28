@@ -64,6 +64,7 @@ executable miti
     -- Modules included in this executable, other than Main.
     other-modules: 
         Utils,
+        Analyser.Expr, Analyser.FunContext,
         Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
         Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
 
