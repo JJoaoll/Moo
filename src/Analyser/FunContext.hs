@@ -14,10 +14,10 @@ import qualified Data.List as L
 import Control.Applicative
 
 import Data.Text ( Text )  
+import Analyser.Error
 
 -- ScopeLevel
 type ScopeLevel = Int
-type Msg = Text
 
 -- Just need to verify the type of the vars-4-now
 data FunContext = FunCtx 
@@ -36,17 +36,6 @@ data Decl = Decl
   , dclType  :: Type
   , dclLevel :: ScopeLevel
   } deriving (Eq, Show)
-
-data Ok 
-  = Ok deriving (Eq, Show)
-
-data Error 
-  = Error 
-  | VarNotFound Msg
-  | FunNotFound Msg
-  | IncorrectArity Msg Int Int -- FunName Expected Got
-  | PatternNotFound Msg 
-  deriving (Eq, Show)
 
 ---- Finders ----
 

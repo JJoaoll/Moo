@@ -14,6 +14,8 @@ import Grammar.Sttm
 import Grammar.Type
 
 import qualified Data.List as L
+
+import Analyser.Error
 import Utils
 
 -- import Grammar.Utils
