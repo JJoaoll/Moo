@@ -15,7 +15,6 @@ import Utils
 -- EConstr
 -- LConstr "Cons" [1, LConstr "Cons" [x, LConstr "Nil" []]]
 
-
 data Lit
   = LInt   Int 
   | LChar  Char

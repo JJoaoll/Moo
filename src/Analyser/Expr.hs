@@ -19,15 +19,35 @@ import Utils
 
 import Control.Monad (forM, forM_, void)
 
+-- be right back soon
 checkExpr :: FunContext -> Expr -> Either Error Type
 ctx `checkExpr` (ELit lit) = 
   case lit of
     LInt   _ -> pure TInt
     LChar  _ -> pure TChar
     LFloat _ -> pure TChar
-    LConstr name lits -> undefined
+    LConstr name lits -> 
+      case ctx `findConstrAndTypeDefsByName` name of
+        Nothing -> Left Error
+        Just (ConstrDef{cParams}, TypeDef{tName, tParams})
+          | length cParams /= length lits -> Left Error
+          | otherwise -> do
+              tLits <- forM lits $ \lit' -> do
+                ctx `checkExpr` ELit lit'
 
-ctx `checkExpr` (EConstr name args) = undefined
+              -- Pega os cParams e usando os que forem var,
+              -- substitui no Data pra produzir um novo tipo
+              -- com (sem ForAll :( ) as TVars substituidas
+              -- pelos tipos aplicados em cada cparams.
+              -- TODO: check the types somehow
+
+              -- pure $ TData tName tLits
+            
+
+ctx `checkExpr` (EConstr name args) = 
+  case ctx `findConstrAndTypeDefsByName` name of
+    Just (cnstrDef, typeDef) -> undefined
+    Nothing -> Left Error
 
 ctx `checkExpr` (EVar name) =
   case ctx `findDecl` name of 
