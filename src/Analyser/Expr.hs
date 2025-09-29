@@ -1,4 +1,5 @@
 -- {-# LANGUAGE RecordWildCards #-}
+-- {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
 module Analyser.Expr where
@@ -17,7 +18,7 @@ import Utils
 
 -- import Grammar.Utils
 
-import Control.Monad (forM, forM_, void)
+import Control.Monad (forM, forM_, void, when)
 
 -- be right back soon
 checkExpr :: FunContext -> Expr -> Either Error Type
@@ -25,7 +26,7 @@ ctx `checkExpr` (ELit lit) =
   case lit of
     LInt   _ -> pure TInt
     LChar  _ -> pure TChar
-    LFloat _ -> pure TChar
+    LFloat _ -> pure TFloat
     LConstr name lits -> 
       case ctx `findConstrAndTypeDefsByName` name of
         Nothing -> Left Error
@@ -35,13 +36,10 @@ ctx `checkExpr` (ELit lit) =
               tLits <- forM lits $ \lit' -> do
                 ctx `checkExpr` ELit lit'
 
-              -- Pega os cParams e usando os que forem var,
-              -- substitui no Data pra produzir um novo tipo
-              -- com (sem ForAll :( ) as TVars substituidas
-              -- pelos tipos aplicados em cada cparams.
-              -- TODO: check the types somehow
-
-              -- pure $ TData tName tLits
+              -- TODO: Lifing
+              case unifyTParams (TVar <$> tParams) tLits cParams of
+                Nothing -> Left Error
+                Just ts -> pure $ TData tName ts
             
 
 ctx `checkExpr` (EConstr name args) = 
@@ -118,3 +116,87 @@ handleFun = undefined
 --        (length fParams) (length args)
       
 --     -- | zipWith (==) (paramType fParams) 
+-- tparams (fake ForAll)          appTs                                    cParams 
+-- [Var a, Var b] [BinTree(a, Float), Float, BinTree(a, Float)] [BinTree(a, b), a, BinTree(a, b)] --> [a, Float]
+unifyTParams :: [Type] -> [Type] -> [Type] -> Maybe [Type]
+unifyTParams tParams [] [] = Just tParams
+unifyTParams tParams (appT:appTs) (cParam:cParams) =
+  case (appT, cParam) of
+    (TVar x, TVar x')
+      | x /= x' -> error "The program has reach to a impossible state 🤡"
+      | otherwise -> unifyTParams tParams appTs cParams
+
+    (someType, TVar x) -> 
+      unifyTParams (tParams `replacing` (x, someType)) appTs cParams
+
+    (TData name ts, TData name' ts') 
+      | name /= name' -> Nothing
+      | length ts /= length ts' -> Nothing
+      | otherwise -> do
+          tParamsAfterArgs <- unifyTParams tParams ts ts'
+          unifyTParams tParamsAfterArgs appTs cParams
+
+    _ -> Nothing
+
+    where 
+        replacing :: [Type] -> (Name, Type) -> [Type]
+        [] `replacing` _ = []
+        (TVar x':ts) `replacing` m@(x, t) 
+          | x == x'   = t:(ts `replacing` m)
+          | otherwise = TVar x': (ts `replacing` m)
+        (TData tName tArgs:ts) `replacing` m
+          = TData tName (tArgs `replacing` m) : ts `replacing` m
+        (t:ts) `replacing` m
+          = t:(ts `replacing` m)
+
+
+
+unifyTParams _ _ _ = Nothing
+-- unifyBlah tParams appTs cParams = -- replace binders cParams
+--   let 
+--     stp1 = zip appTs cParams 
+--     stp2 = mapM match stp1
+--   in do
+--     unifiedTypesSomehow <- stp2
+
+     
+        
+
+
+
+      -- match (appT, TVar _) = Just appT 
+      -- match (TData name ts, TData name' ts') 
+      --   | name /= name'= Nothing
+      --   | otherwise = do
+      --     mTs <- mapM match $ zip ts ts'
+      --     pure (TData name mTs)
+
+
+
+
+
+
+
+    -- binders = zip tParams appTs
+    -- replace :: [(Name, Type)] -> [Type] -> [Type]
+    -- replace _ [] = []
+    -- replace k_vs (t:ts) = 
+    --   case t of
+    --     TVar x -> 
+    --       case L.find ((==x) . fst) k_vs of
+    --         Just (_k, v)  -> v:replace k_vs ts
+    --         Nothing       -> t:replace k_vs ts
+    --     TData name tArgs -> 
+    --       let tArgs' = replace k_vs tArgs
+    --         in TData name tArgs' : replace k_vs ts
+    --     _ -> t:replace k_vs ts
+
+
+-- LConstr name lits -> 
+--   case ctx `findConstrAndTypeDefsByName` name of
+--     Nothing -> Left Error
+--     Just (ConstrDef{cParams}, TypeDef{tName, tParams})
+--       | length cParams /= length lits -> Left Error
+--       | otherwise -> do
+--           tLits <- forM lits $ \lit' -> do
+--             ctx `checkExpr` ELit lit'
