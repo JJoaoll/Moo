@@ -44,15 +44,24 @@ ctx `checkExpr` (ELit lit) =
 
 ctx `checkExpr` (EConstr name args) = 
   case ctx `findConstrAndTypeDefsByName` name of
-    Just (cnstrDef, typeDef) -> undefined
     Nothing -> Left Error
+    Just (ConstrDef{cParams}, TypeDef{tName, tParams}) 
+      | length cParams /= length args -> Left Error
+      | otherwise -> do
+          tLits <- forM args $ \arg -> do
+            ctx `checkExpr` arg
+
+          -- TODO: Lifing
+          case unifyTParams (TVar <$> tParams) tLits cParams of
+            Nothing -> Left Error
+            Just ts -> pure $ TData tName ts
 
 ctx `checkExpr` (EVar name) =
   case ctx `findDecl` name of 
     Nothing -> Left $ VarNotFound name
     Just (Decl{dclType}) -> pure dclType
 
--- pre-process :PP TODO:
+-- pre-process :PP TODO: -- maybe the parser?? no
 ctx `checkExpr` (EConst name) = 
   case ctx `findConstDef` name of 
     Nothing -> Left Error
@@ -89,7 +98,7 @@ checkExpr ctx (EBinOp lExpr op rExpr) = do
       | op `elem` badCompareBinOps -> pure TBool
     (TBool, TBool)
       | op `elem` boolBinOps -> pure TBool
-    ((TList a), (TList b))
+    (TList a, TList b)
       | a == b && op `elem` listBinOps -> pure (TList a)
     _ -> Left Error
       
@@ -97,27 +106,26 @@ checkExpr ctx (EFunCall fName args) =
   case ctx `findFunDef` fName of
     Nothing -> Left $ FunNotFound fName
     Just f  -> handleFun ctx f args
-      
 
 ---- Handlers ----
 
 handleFun :: FunContext -> FunDef -> [Expr] -> Either Error Type
-handleFun = undefined
--- handleFun ctx FunDef{fName, fParams, rtrType} args 
---   | length fParams == length (args :: [Expr]) = do
---       ts <- forM args (ctx `checkExpr`) 
---       if ts == (paramType <$> fParams) then
---         pure rtrType 
---       else
---         Left Error -- TODO: Improve this Error!
+handleFun ctx FunDef{fName, fParams, rtrType} args 
+  | length fParams == length args = do
+      ts <- forM args (ctx `checkExpr`) 
+      if ts == (pType <$> fParams) then
+        pure rtrType 
+      else
+        Left Error -- TODO: Improve this Error!
 
---   | otherwise = Left $
---      IncorrectArity fName 
---        (length fParams) (length args)
+  | otherwise = Left $
+     IncorrectArity fName 
+       (length fParams) (length args)
       
---     -- | zipWith (==) (paramType fParams) 
+    -- | zipWith (==) (paramType fParams) 
 -- tparams (fake ForAll)          appTs                                    cParams 
 -- [Var a, Var b] [BinTree(a, Float), Float, BinTree(a, Float)] [BinTree(a, b), a, BinTree(a, b)] --> [a, Float]
+
 unifyTParams :: [Type] -> [Type] -> [Type] -> Maybe [Type]
 unifyTParams tParams [] [] = Just tParams
 unifyTParams tParams (appT:appTs) (cParam:cParams) =
@@ -148,55 +156,4 @@ unifyTParams tParams (appT:appTs) (cParam:cParams) =
           = TData tName (tArgs `replacing` m) : ts `replacing` m
         (t:ts) `replacing` m
           = t:(ts `replacing` m)
-
-
-
 unifyTParams _ _ _ = Nothing
--- unifyBlah tParams appTs cParams = -- replace binders cParams
---   let 
---     stp1 = zip appTs cParams 
---     stp2 = mapM match stp1
---   in do
---     unifiedTypesSomehow <- stp2
-
-     
-        
-
-
-
-      -- match (appT, TVar _) = Just appT 
-      -- match (TData name ts, TData name' ts') 
-      --   | name /= name'= Nothing
-      --   | otherwise = do
-      --     mTs <- mapM match $ zip ts ts'
-      --     pure (TData name mTs)
-
-
-
-
-
-
-
-    -- binders = zip tParams appTs
-    -- replace :: [(Name, Type)] -> [Type] -> [Type]
-    -- replace _ [] = []
-    -- replace k_vs (t:ts) = 
-    --   case t of
-    --     TVar x -> 
-    --       case L.find ((==x) . fst) k_vs of
-    --         Just (_k, v)  -> v:replace k_vs ts
-    --         Nothing       -> t:replace k_vs ts
-    --     TData name tArgs -> 
-    --       let tArgs' = replace k_vs tArgs
-    --         in TData name tArgs' : replace k_vs ts
-    --     _ -> t:replace k_vs ts
-
-
--- LConstr name lits -> 
---   case ctx `findConstrAndTypeDefsByName` name of
---     Nothing -> Left Error
---     Just (ConstrDef{cParams}, TypeDef{tName, tParams})
---       | length cParams /= length lits -> Left Error
---       | otherwise -> do
---           tLits <- forM lits $ \lit' -> do
---             ctx `checkExpr` ELit lit'
