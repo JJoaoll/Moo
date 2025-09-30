@@ -126,7 +126,7 @@ handleFun ctx FunDef{fName, fParams, rtrType} args
       
     -- | zipWith (==) (paramType fParams) 
 -- tparams (fake ForAll)          appTs                                    cParams 
--- [Var a, Var b] [BinTree(a, Float), Float, BinTree(a, Float)] [BinTree(a, b), a, BinTree(a, b)] --> [a, Float]
+-- [TVar a, TVar b] [BinTree(a, Float), Float, BinTree(a, Float)] [BinTree(a, b), a, BinTree(a, b)] --> [a, Float]
 
 unifyTParams :: [Type] -> [Type] -> [Type] -> Maybe [Type]
 unifyTParams tParams [] [] = Just tParams

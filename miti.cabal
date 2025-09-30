@@ -65,6 +65,7 @@ executable miti
     other-modules: 
         Utils,
         Analyser.Expr, Analyser.FunContext, Analyser.TypeDef, Analyser.Error,
+        Analyser.Sttm, Analyser.Pattern,
         Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
         Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
 
