@@ -21,7 +21,7 @@ type Scope = [Decl]
 
 -- Just need to verify the type of the vars-4-now
 data FunContext = FunCtx 
-  { ctxDecls    :: NonEmpty Scope -- decl[SCOPE][VAR] 
+  { ctxDecls    :: NonEmpty Scope -- decl[SCOPE][VAR] -- rename -> Stack?
   , ctxGlobals  :: [GlobalDef] -- could be just the bottom of the scopes
   , ctxConsts   :: [ConstDef]
   , ctxFunDefs  :: [FunDef]
