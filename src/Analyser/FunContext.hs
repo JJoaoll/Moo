@@ -9,6 +9,7 @@ import Prelude hiding ((!!), any)
 import Data.List.NonEmpty
 
 import Utils
+import Control.Monad
 
 import Analyser.Error
 import qualified Data.List as L
@@ -36,6 +37,18 @@ data Decl = Decl
   -- , dclLevel :: ScopeLevel --> im already handleing it in the matrix!
   } deriving (Eq, Show)
 
+
+
+-- concrete: 👍; abstract: 👎;
+checkType :: FunContext -> Type -> Either Error ()
+checkType _ (TVar _) = Left Error
+ctx `checkType` (TData tName tArgs) = do
+  case ctx `findTypeDef` tName of 
+    Nothing -> Left Error
+    Just TypeDef{tParams} 
+      | L.length tArgs /= L.length tParams -> Left Error
+      | otherwise -> forM_ tArgs (ctx `checkType`)
+checkType _ _ = pure ()
 
 ---- Block dealer ----
 
