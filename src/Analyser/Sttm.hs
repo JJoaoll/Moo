@@ -36,17 +36,60 @@ ctx `checkSttm` (SInit name typε expr) = do
   else
     Left Error -- TODO: incompatible types
 
-ctx `checkSttm` (SAtrib name expr) = undefined
-ctx `checkSttm` (SPrint expr) = undefined
-ctx `checkSttm` (SScan typε) = undefined
-ctx `checkSttm` (SFunCall fName fArgs) = undefined
-ctx `checkSttm` (SMatch scrutinee cases) = undefined
-ctx `checkSttm` (SWhile cond body) = undefined
-ctx `checkSttm` (SFor i is sttms) = undefined
-ctx `checkSttm` (SReturn expr) = undefined
+ctx `checkSttm` (SAtrib name expr) = do
+  exprType <- ctx `checkExpr` expr
+  case ctx `findDecl` name of
+    Nothing -> Left Error
+    Just Decl{dclType} 
+      | dclType == exprType -> pure ctx
+      | otherwise -> Left Error
+  
+ctx `checkSttm` (SPrint expr) = do
+  void $ ctx `checkExpr` expr
+  pure ctx
+
+ctx `checkSttm` (SScan typε) = do
+  ctx `checkType` typε
+  pure ctx
+  
+ctx `checkSttm` (SFunCall fName fArgs) = do
+  case ctx `findFunDef` fName of
+    Nothing -> Left Error
+    Just f -> ctx <$ handleFun ctx f fArgs
+  
+ctx `checkSttm` (SMatch scrutinee cases) = do
+  scrtnType <- ctx `checkExpr` scrutinee
+
+  forM_ cases $ \(pttrn, sttms) -> do
+    void $ checkPattern ctx pttrn scrtnType
+    foldM_ checkSttm (enterBlock ctx) sttms
+
+  pure ctx
+
+ctx `checkSttm` (SWhile cond body) = do 
+  condType <- ctx `checkExpr` cond
+  if condType /= TBool then
+    Left Error
+  else 
+    ctx <$ foldM checkSttm (enterBlock ctx) body
+
+ctx `checkSttm` (SFor i is body) = do
+  lType <- ctx `checkExpr` is
+  case lType of
+    TList a -> do
+      newCtx <- ctx |> enterBlock |> addDecl i a
+      ctx <$ foldM checkSttm newCtx body
+    _ -> Left Error
 
 
-checkSttm _ _ = undefined
+ctx `checkSttm` (SReturn expr) = do
+  exprType <- ctx `checkExpr` expr
+  if ctxRtrnType ctx == exprType then
+    pure ctx
+  else
+    Left Error
+
+
 
 -- checkSttmM :: Sttm -> CheckM ()
 -- checkSttmM (SInit name typε expr) = do -- ✅
