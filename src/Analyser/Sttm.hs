@@ -3,8 +3,6 @@
 
 module Analyser.Sttm where
 
-import Control.Monad (forM, forM_, void)
-import Control.Monad.State.Strict (StateT, runStateT, get, put, lift, modify)
 
 import qualified Analyser.TypeDef as TypeDef (findType)
 
@@ -18,10 +16,14 @@ import Analyser.Pattern
 import Analyser.FunContext
 
 import Control.Monad
+import Control.Monad.State.Strict (StateT, runStateT, get, put, lift, modify)
+
+import qualified Data.List as L
 import Data.List.NonEmpty
 
 import Utils
 
+-- maybe it would be bettter to just return the FunContext 🤡
 -- TODO: make everything modularized
 type CheckM = StateT FunContext (Either Error)
 
@@ -30,55 +32,49 @@ checkSttmM (SInit name typε expr) = do -- ✅
   ctx <- get
   exprType <- lift $ ctx `checkExpr` expr
   if exprType == typε then do
+    checkType typε
     newCtx <- lift $ addDecl name typε ctx
     put newCtx
   else
     lift $ Left Error -- TODO: incompatible types
 
-checkSttmM (SAtrib name expr) = do -- 
+checkSttmM (SAtrib name expr) = do -- ✅
   ctx <- get
   Decl{dclType} <- lift $ maybe (Left Error) Right (ctx `findDecl` name)
   exprType <- lift $ ctx `checkExpr` expr
   if dclType == exprType then
-    pure () -- não precisa atualizar contexto
+    pure () 
   else
-    lift $ Left Error -- TODO: tipos incompatíveis
+    lift $ Left Error -- TODO: incompatible types
 
-checkSttmM (SPrint expr) = do
+checkSttmM (SPrint expr) = do -- ✅
   ctx <- get
   _ <- lift $ ctx `checkExpr` expr
   pure ()
 
-checkSttmM (SScan typε) = do
-  ctx <- get
-  case typε of
-    TVar _ -> lift $ Left Error -- TODO: Msg
-    TData name _ 
-      | ctx `hasType` name -> pure ()
-      | otherwise -> lift $ Left Error -- TODO: Msg
-    _ -> pure ()
+checkSttmM (SScan typε) = checkType typε -- ✅
 
-checkSttmM (SFunCall fName fArgs) = do
+checkSttmM (SFunCall fName fArgs) = do -- ✅
   ctx <- get
   if ctx `hasFun` fName then do
-    _ <- lift $ ctx `checkExpr` (EFunCall fName fArgs)
+    _ <- lift $ ctx `checkExpr` EFunCall fName fArgs
     pure ()
   else
-    lift $ Left Error -- TODO: função não encontrada
+    lift $ Left Error 
 
--- Versões com blocos (usando enterBlock/quitBlock)
 checkSttmM (SMatch scrutinee cases) = do
   ctx <- get
-  _scrtnType <- lift $ ctx `checkExpr` scrutinee
-  forM_ cases $ \(_pttrn, sttms) -> do
+  scrtnType <- lift $ ctx `checkExpr` scrutinee
+  forM_ cases $ \(pttrn, sttms) -> do
     currentCtx <- get
-    -- TODO: checkPattern _pttrn _scrtnType
-    -- Cada caso tem seu próprio escopo
+    void $ lift $ checkPattern currentCtx pttrn scrtnType
     put (enterBlock currentCtx)
-    checkSttmsM sttms
-    -- Volta ao escopo anterior
+    forM_ sttms checkSttmM 
+      
+    -- back one step? (does it even work?)
     blockCtx <- get
     parentCtx <- lift $ maybe (Left Error) Right (quitBlock blockCtx)
+
     put parentCtx
 
 checkSttmM (SWhile cond body) = do
@@ -216,6 +212,7 @@ checkSttm ctx (SReturn expr) = do
   else
     pure Ok
 
+-- remove this booleanism!!!
 isFreshVarIn :: Name -> FunContext -> Bool
 name `isFreshVarIn` ctx = 
   case ctx `findDecl` name of
@@ -233,6 +230,20 @@ ctx `hasFun` name =
   case ctx `findFunDef` name of
     Nothing -> False
     Just _  -> True
+
+-- concrete 👍 -- abstract 👎
+checkType :: Type -> CheckM ()
+checkType (TVar _) = lift $ Left Error
+checkType (TData tName tArgs) = do
+  ctx <- get
+  case ctx `findTypeDef` tName of 
+    Nothing -> lift $ Left Error
+    Just TypeDef{tParams} 
+      | L.length tArgs /= L.length tParams -> lift $ Left Error
+      | otherwise -> forM_ tArgs checkType
+checkType _ = pure ()
+
+
 
 
 -- paramToDecl :: ScopeLevel -> Param -> Decl

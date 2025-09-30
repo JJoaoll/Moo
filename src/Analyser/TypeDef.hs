@@ -64,6 +64,7 @@ checkTypeArgs (t:ts) typeParams typeDefs = do
     _ -> pure ()
   checkTypeArgs ts typeParams typeDefs
 
+-- WHAT ABOUT THE TInt, TChar and TFloat
 findType :: Name -> [TypeDef] -> Maybe TypeDef
 findType name = find matchName
   where 
