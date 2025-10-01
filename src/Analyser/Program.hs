@@ -3,13 +3,16 @@
 
 module Analyser.Program where
   
+import Grammar.Expr
 import Grammar.Program
 
-import Analyser.Expr
+import Analyser.Error
+
 import Analyser.FunDef
 import Analyser.TypeDef
-
-import Analyser.Error
+import Analyser.Context.Def
+import Analyser.Context.Expr
+import Analyser.Context.Utils
 
 import Control.Monad
 
@@ -43,11 +46,17 @@ checkProgram Program{..} = do
 checkGlobal :: Context -> GlobalDef -> Either Error ()
 ctx `checkGlobal` Global{..} = do
   exprType <- ctx `checkExpr` gExpr 
-  void $ ctx `checkType` gType 
-  if gType == exprType then
-    pure()
-  else
-    Left Error
+  ctx `checkType` gType 
+  unless (gType == exprType) $ Left Error
 
+-- only literal constants?
 checkConst :: Context -> ConstDef -> Either Error ()
-ctx `checkConst` k = undefined
+ctx `checkConst` Const{..} =
+  case kVal of
+    ELit _ -> do
+      kType' <- ctx `checkExpr` kVal
+      unless (kType' == kType) (Left Error)
+
+    _ -> Left Error
+
+  

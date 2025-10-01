@@ -1,27 +1,19 @@
--- {-# LANGUAGE RecordWildCards #-}
--- {-# LANGUAGE PartialTypeSignatures #-}
-{-# LANGUAGE NamedFieldPuns #-}
+module Analyser.Context.Expr where
 
-module Analyser.Expr where
+import Analyser.Context.Def
+import Analyser.Context.Utils
+import Analyser.Error
 
--- import Check.FunDef.Context
-
-import Analyser.FunContext
-
-import Grammar.Program
 import Grammar.Expr
+import Grammar.Program
 import Grammar.Type
 
+import Control.Monad
 
-import Analyser.Error
 import Utils
 
--- import Grammar.Utils
-
-import Control.Monad (forM, forM_)
-
 -- be right back soon
-checkExpr :: FunContext -> Expr -> Either Error Type
+checkExpr :: Context -> Expr -> Either Error Type
 ctx `checkExpr` (ELit lit) = 
   case lit of
     LInt   _ -> pure TInt
@@ -56,12 +48,9 @@ ctx `checkExpr` (EConstr name args) =
             Nothing -> Left Error
             Just ts -> pure $ TData tName ts
 
-ctx `checkExpr` (EVar name) =
-  case ctx `findDecl` name of 
-    Nothing -> Left $ VarNotFound name
-    Just (Decl{dclType}) -> pure dclType
+-- NO EVARS HERE! NO NEED TO CHECK!
+_ `checkExpr` (EVar _) = Left Error
 
--- pre-process :PP TODO: -- maybe the parser?? no
 ctx `checkExpr` (EConst name) = 
   case ctx `findConstDef` name of 
     Nothing -> Left Error
@@ -111,18 +100,19 @@ checkExpr ctx (EFunCall fName args) =
 
 ---- Handlers ----
 
-handleFun :: FunContext -> FunDef -> [Expr] -> Either Error Type
+handleFun :: Context -> FunDef -> [Expr] -> Either Error Type
 handleFun ctx FunDef{fName, fParams, rtrType} args 
-  | length fParams == length args = do
+  | length fParams /= length args = Left $ 
+     IncorrectArity fName 
+       (length fParams) (length args)
+
+  | otherwise = do
       ts <- forM args (ctx `checkExpr`) 
       if ts == (pType <$> fParams) then
         pure rtrType 
       else
         Left Error -- TODO: Improve this Error!
 
-  | otherwise = Left $
-     IncorrectArity fName 
-       (length fParams) (length args)
       
     -- | zipWith (==) (paramType fParams) 
 -- tparams (fake ForAll)          appTs                                    cParams 

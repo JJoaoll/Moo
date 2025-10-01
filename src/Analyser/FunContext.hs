@@ -1,6 +1,10 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Analyser.FunContext where
+module Analyser.FunContext 
+  (module Analyser.FunContext, 
+   module Analyser.Context.Def) where
+
+import Analyser.Context.Def
 
 import Grammar.Program
 import Grammar.Type
@@ -20,6 +24,7 @@ type ScopeLevel = Int
 type Scope = [Decl]
 
 -- Just need to verify the type of the vars-4-now
+-- TODO: just extend the Context?
 data FunContext = FunCtx 
   { ctxDecls    :: NonEmpty Scope -- decl[SCOPE][VAR] -- rename -> Stack?
   , ctxGlobals  :: [GlobalDef] -- could be just the bottom of the scopes
@@ -29,15 +34,6 @@ data FunContext = FunCtx
   , ctxLevel    :: ScopeLevel
   , ctxRtrnType :: Type
   } deriving (Eq, Show)
-
--- Don't need values Here!
-data Decl = Decl
-  { dclName  :: Name
-  , dclType  :: Type
-  -- , dclLevel :: ScopeLevel --> im already handleing it in the matrix!
-  } deriving (Eq, Show)
-
-
 
 -- concrete: 👍; abstract: 👎;
 checkType :: FunContext -> Type -> Either Error ()

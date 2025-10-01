@@ -9,7 +9,7 @@ import Analyser.Error
 
 import Utils
 import Grammar.Type 
-import Control.Monad (forM, forM_, void, unless)
+import Control.Monad 
 
 import Data.List
 

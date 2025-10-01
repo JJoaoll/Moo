@@ -31,7 +31,6 @@ data GlobalDef = Global
   , gType :: Type 
   } deriving (Eq, Show)
 
-
 -- <const> flag = "-hfsh--trace-show special"
 data ConstDef = Const 
   { kName :: Name
