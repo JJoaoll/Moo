@@ -10,17 +10,15 @@ import Analyser.FunContext
 
 import Grammar.Program
 import Grammar.Expr
-import Grammar.Sttm
 import Grammar.Type
 
-import qualified Data.List as L
 
 import Analyser.Error
 import Utils
 
 -- import Grammar.Utils
 
-import Control.Monad (forM, forM_, void, when)
+import Control.Monad (forM)
 
 -- be right back soon
 checkExpr :: FunContext -> Expr -> Either Error Type

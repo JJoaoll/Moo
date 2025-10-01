@@ -17,11 +17,11 @@ type Params = [Param]
 type SubProgram = Program
 
 data Program = Program
-  { pImports  :: [SubProgram]
-  , pGlobals  :: [GlobalDef]
-  , pConsts   :: [ConstDef]
-  , pFuns     :: [FunDef]
-  , pTypes    :: [TypeDef]
+  { --{ pImports  :: [SubProgram] -- the parser should expand that!
+    pGlobals :: [GlobalDef]
+  , pConsts  :: [ConstDef]
+  , pFuns    :: [FunDef]
+  , pTypes   :: [TypeDef]
   } deriving (Eq, Show)
 
 -- @global abelha: Int = fib(5)

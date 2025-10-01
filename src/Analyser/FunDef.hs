@@ -1,20 +1,17 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Analyser.Fun where
-  -- funDef
+module Analyser.FunDef where
 
 import Analyser.Error
 
 import Grammar.Program
 import Grammar.Type
-import Grammar.Sttm (Sttm(..))
 
 import Analyser.Sttm
 import Analyser.FunContext
 
 import Data.List.NonEmpty
 import Control.Monad
-import qualified Data.List as L
 
 -- the existence of this implies that u should refactor it
 data Context = Ctx
@@ -47,5 +44,6 @@ checkFun Ctx{..} FunDef{..} =
 paramToDecl :: Param -> Decl
 paramToDecl Param{..} =
   Decl pName pType
+
 
 
