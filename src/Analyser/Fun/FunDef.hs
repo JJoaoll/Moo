@@ -8,25 +8,24 @@ import Analyser.Error
 import Grammar.Program
 
 import Analyser.Fun.Sttm
-import Analyser.Fun.FunContext
+import Analyser.Fun.FunContext.Def
 
 import Data.List.NonEmpty
 import Control.Monad
 
+import Analyser.Context.Utils
+
 
 checkFun :: Context -> FunDef -> Either Error ()
-checkFun Ctx{..} FunDef{..} = 
+checkFun ctx FunDef{..} = 
   let 
     initialStack = (paramToDecl <$> fParams) :| []
     funCtx = 
       FunCtx {
-        ctxDecls    = initialStack,
-        ctxGlobals  = getGlobals,
-        ctxConsts   = getConsts,
-        ctxTypeDefs = getTypeDefs,
-        ctxFunDefs  = getFunDefs,
-        ctxLevel    = 0,
-        ctxRtrnType = rtrType
+        _getStack    = initialStack,
+        _getCtx      = ctx,
+        _getLevel    = 0,
+        _getRtrnType = rtrType
       }
   in 
     -- if returns, returs the right type
