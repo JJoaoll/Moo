@@ -17,14 +17,13 @@ import Analyser.Fun.FunDef
 import Control.Monad
 
 import qualified Data.List as L
-import Utils
 
   -- = L.find (fName ||> (==name)) getFunDefs
 checkProgram :: Program -> Either Error ()
 checkProgram Program{..} = do
 
   -- 0: is the main here?
-  unless (L.any (fName ||> (=="main")) pFuns) 
+  unless (L.any (("main"==) . fName) pFuns) 
     $ Left (FunNotFound "main")
 
   -- 1: types are ok assuming that the others are also ok. (so ⊥s're allowed..)

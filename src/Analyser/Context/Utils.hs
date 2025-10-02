@@ -1,3 +1,4 @@
+{-# LANGUAGE RecordWildCards #-}
 
 module Analyser.Context.Utils where
 
@@ -7,12 +8,17 @@ import Analyser.Context.Def
 import Grammar.Program
 import Grammar.Type
 
+import Control.Lens hiding (element, Context, has)
 import qualified Data.List as L
 
 import Control.Monad (forM_)
 
 import Utils
 
+-- indicates theres to much
+paramToDecl :: Param -> Decl
+paramToDecl Param{..} =
+  Decl pName pType
 
 -- concrete: 👍; abstract: 👎;
 checkType :: Context -> Type -> Either Error ()
@@ -29,29 +35,28 @@ checkType _ _ = pure ()
 -- no findDecl because we're not inside a function
 
 findFunDef :: Context -> Name -> Maybe FunDef
-findFunDef Ctx{getFunDefs} name 
-  = L.find (fName ||> (==name)) getFunDefs
-
+findFunDef ctx name = 
+  L.find ((name==) . fName) (ctx ^. getFunDefs)
 
 findTypeDef :: Context -> Name -> Maybe TypeDef
-findTypeDef Ctx{getTypeDefs} name
-  = L.find (tName ||> (==name)) getTypeDefs
+findTypeDef ctx name -- {ctxTypeDefs} name
+  = L.find ((name==) . tName) (ctx ^. getTypeDefs)
 
 findGlobalDef :: Context -> Name -> Maybe GlobalDef
-findGlobalDef Ctx{getGlobals} name
-  = L.find (gName ||> (==name)) getGlobals
+findGlobalDef ctx name -- {ctxGlobals} name
+  = L.find ((name==) . gName) (ctx ^. getGlobals)
 
 findConstDef :: Context -> Name -> Maybe ConstDef
-findConstDef Ctx{getConsts} name
-  = L.find (kName ||> (==name)) getConsts
+findConstDef ctx name --{ctxConsts} name
+  = L.find ((name==) . kName) (ctx ^. getConsts)
 
 -- needs a fix
 findConstrAndTypeDefsByName :: Context -> Name -> Maybe (ConstrDef, TypeDef)
-findConstrAndTypeDefsByName Ctx{getTypeDefs} constrName = do
+findConstrAndTypeDefsByName ctx constrName = do
 
-  typeDef  <- L.find (tConstrs ||> has constrName) getTypeDefs
-  cnstrDef <- L.find (cName ||> (==constrName)) (tConstrs typeDef)
+  typeDef  <- L.find (has constrName . tConstrs) (ctx ^. getTypeDefs)
+  cnstrDef <- L.find ((==constrName) . cName) (tConstrs typeDef)
   pure (cnstrDef, typeDef)
 
   where 
-    has name = L.any (cName ||> (== name)) 
+    has name = L.any ((== name) . cName) 

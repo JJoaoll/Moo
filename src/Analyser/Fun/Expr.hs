@@ -6,7 +6,8 @@ module Analyser.Fun.Expr where
 
 -- import Check.FunDef.Context
 
-import Analyser.Fun.FunContext
+import Analyser.Fun.FunContext.Def
+import Analyser.Fun.FunContext.Utils
 
 import Grammar.Program
 import Grammar.Expr

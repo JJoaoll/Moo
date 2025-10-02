@@ -8,12 +8,12 @@ import Grammar.Sttm
 
 import Analyser.Error
 import Analyser.Fun.Expr
-import Analyser.Pattern
-import Analyser.Fun.FunContext
+import Analyser.Fun.Pattern
+import Analyser.Fun.FunContext.Def
+import Analyser.Fun.FunContext.Utils
 
 import Control.Monad
-
-import Utils
+import Control.Lens hiding (Context)
 
 checkSttm :: FunContext -> Sttm -> Either Error FunContext
 ctx `checkSttm` (SInit name typε expr) = do 
@@ -65,14 +65,14 @@ ctx `checkSttm` (SFor i is body) = do
   lType <- ctx `checkExpr` is
   case lType of
     TList a -> do
-      newCtx <- ctx |> enterBlock |> addDecl i a
+      newCtx <- ctx & enterBlock & addDecl i a
       ctx <$ foldM checkSttm newCtx body
     _ -> Left Error
 
 
 ctx `checkSttm` (SReturn expr) = do
   exprType <- ctx `checkExpr` expr
-  if ctxRtrnType ctx == exprType then
+  if (ctx ^. getRtrnType) == exprType then
     pure ctx
   else
     Left Error

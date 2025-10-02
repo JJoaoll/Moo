@@ -1,4 +1,4 @@
-module Analyser.Pattern where
+module Analyser.Fun.Pattern where
 
 import Grammar.Expr
 import Grammar.Type
@@ -6,7 +6,8 @@ import Grammar.Sttm
 
 import Analyser.Error
 import Analyser.Fun.Expr
-import Analyser.Fun.FunContext
+import Analyser.Fun.FunContext.Def
+import Analyser.Fun.FunContext.Utils
 
 import Control.Monad
 

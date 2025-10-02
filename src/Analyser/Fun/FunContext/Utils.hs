@@ -8,7 +8,7 @@ import Grammar.Type
 import Prelude hiding ((!!), any)
 import Data.List.NonEmpty
 
-import Utils hiding ((|>))
+import Utils  
 import Control.Monad
 
 import Analyser.Error
