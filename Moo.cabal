@@ -80,6 +80,7 @@ executable Moo
                     , mtl
                     , parser-combinators
                     , text
+                    , lens
 
     -- Directories containing source files.
     hs-source-dirs:   src

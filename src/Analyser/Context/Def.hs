@@ -1,8 +1,13 @@
 {-# LANGUAGE RecordWildCards #-}
+{-# LANGUAGE TemplateHaskell #-}
+
 module Analyser.Context.Def where
 
 import Grammar.Program
 import Grammar.Type
+
+import Control.Lens hiding (element, Context)
+import Control.Lens.TH
 
 import Utils
 
@@ -13,6 +18,8 @@ data Context = Ctx
   , getFunDefs  :: [FunDef]
   , getTypeDefs :: [TypeDef]
   } deriving (Eq, Show)
+
+$(makeLenses ''Context)
 
 -- Don't need values Here!
 data Decl = Decl

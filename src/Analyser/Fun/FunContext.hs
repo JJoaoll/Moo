@@ -1,4 +1,5 @@
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE TemplateHaskell #-}
 
 module Analyser.Fun.FunContext 
   (module Analyser.Fun.FunContext, 
@@ -19,21 +20,31 @@ import Analyser.Error
 import qualified Data.List as L
 import Control.Applicative
 
+import Control.Lens hiding (element, Context, (|>))
+import Control.Lens.TH
+
 -- ScopeLevel
 type ScopeLevel = Int
 type Scope = [Decl]
 
 -- Just need to verify the type of the vars-4-now
--- TODO: just extend the Context?
+-- Use Lens!!!!!!!!
+-- data Context = Ctx
+--   { getGlobals  :: [GlobalDef] -- could be just the bottom of the scopes
+--   , getConsts   :: [ConstDef]
+--   , getFunDefs  :: [FunDef]
+--   , getTypeDefs :: [TypeDef]
+--   } deriving (Eq, Show)
+
 data FunContext = FunCtx 
-  { ctxDecls    :: NonEmpty Scope -- decl[SCOPE][VAR] -- rename -> Stack?
-  , ctxGlobals  :: [GlobalDef] -- could be just the bottom of the scopes
-  , ctxConsts   :: [ConstDef]
-  , ctxFunDefs  :: [FunDef]
-  , ctxTypeDefs :: [TypeDef]
-  , ctxLevel    :: ScopeLevel
-  , ctxRtrnType :: Type
+  { getCtx         -- TODO: tirar essa coisa de NonEmpty
+  , getStack    :: NonEmpty Scope -- decl[SCOPE][VAR] -- rename -> Stack?
+  , getLevel    :: ScopeLevel
+  , getRtrnType :: Type
   } deriving (Eq, Show)
+
+-- lens (https://hackage.haskell.org/package/lens-tutorial-1.0.5/docs/Control-Lens-Tutorial.html):
+$(makeLenses ''FunContext)
 
 -- concrete: 👍; abstract: 👎;
 checkType :: FunContext -> Type -> Either Error ()
@@ -49,7 +60,7 @@ checkType _ _ = pure ()
 ---- Block dealer ----
 
 addDecl :: Name -> Type -> FunContext -> Either Error FunContext
-addDecl name t ctx@FunCtx{ctxDecls, ctxLevel} =
+addDecl name t funCtx =
   let 
     d :| ds = ctxDecls
     newDecl = Decl name t
@@ -60,21 +71,23 @@ addDecl name t ctx@FunCtx{ctxDecls, ctxLevel} =
     if alreadyExists then
       Left Error
     else if ctxLevel == 0 then
-      Right $ ctx { ctxDecls = (newDecl : d) :| ds }
+      let ctxDecls = (newDecl : d) :| ds 
+      in Right $ funCtx & getStack .~ ctxDecls -- LENS
     else 
       case L.splitAt (ctxLevel - 1) ds of
         (before, current:after) ->
           let updatedScope = newDecl : current
-          in Right $ ctx { ctxDecls = d :| (before ++ [updatedScope] ++ after) }
+          in Right $ funCtx & getStack .~ d :| (before ++ [updatedScope] ++ after)  -- LENS
         _ -> Left Error -- unreachable case
 
 enterBlock :: FunContext -> FunContext
-enterBlock ctx@FunCtx{ctxDecls, ctxLevel} = 
-  let d :| ds = ctxDecls in
-  ctx { ctxDecls = d :| (ds ++ [[]])  -- adds a empty scope in the ending
-      , ctxLevel = ctxLevel + 1       -- the 'pointer' refers to the new scope 
-      }
+enterBlock funCtx = 
+  let d :| ds = funCtx & getStack in
+    funCtx 
+    |> getStack .~ d :| (ds ++ [[]])-- adds a empty scope in the ending using LENS
+    |> getLevel %~ (+1)
 
+--TODO:
 quitBlock :: FunContext -> Maybe FunContext
 quitBlock (FunCtx _ _ _ _ _ 0 _) = Nothing
 quitBlock ctx@FunCtx{ctxDecls, ctxLevel} =  do
@@ -124,4 +137,4 @@ findConstrAndTypeDefsByName FunCtx{ctxTypeDefs} constrName = do
   pure (cnstrDef, typeDef)
 
   where 
-    has name = L.any (cName ||> (== name)) 
+    has name = L.any (cName ||> (== name))
