@@ -1,7 +1,7 @@
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Analyser.FunContext 
-  (module Analyser.FunContext, 
+module Analyser.Fun.FunContext 
+  (module Analyser.Fun.FunContext, 
    module Analyser.Context.Def) where
 
 import Analyser.Context.Def

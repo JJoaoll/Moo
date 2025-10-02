@@ -1,15 +1,15 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Analyser.Sttm where
+module Analyser.Fun.Sttm where
 
 import Grammar.Type
 import Grammar.Sttm
 
 import Analyser.Error
-import Analyser.Expr
+import Analyser.Fun.Expr
 import Analyser.Pattern
-import Analyser.FunContext
+import Analyser.Fun.FunContext
 
 import Control.Monad
 

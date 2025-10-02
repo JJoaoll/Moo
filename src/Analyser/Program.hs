@@ -8,11 +8,11 @@ import Grammar.Program
 
 import Analyser.Error
 
-import Analyser.FunDef
 import Analyser.TypeDef
 import Analyser.Context.Def
 import Analyser.Context.Expr
 import Analyser.Context.Utils
+import Analyser.Fun.FunDef
 
 import Control.Monad
 

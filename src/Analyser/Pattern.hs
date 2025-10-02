@@ -5,8 +5,8 @@ import Grammar.Type
 import Grammar.Sttm
 
 import Analyser.Error
-import Analyser.Expr
-import Analyser.FunContext
+import Analyser.Fun.Expr
+import Analyser.Fun.FunContext
 
 import Control.Monad
 

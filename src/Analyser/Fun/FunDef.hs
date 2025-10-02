@@ -1,14 +1,14 @@
 {-# LANGUAGE RecordWildCards #-}
 
-module Analyser.FunDef where
+module Analyser.Fun.FunDef where
 
 import Analyser.Context.Def
 import Analyser.Error
 
 import Grammar.Program
 
-import Analyser.Sttm
-import Analyser.FunContext
+import Analyser.Fun.Sttm
+import Analyser.Fun.FunContext
 
 import Data.List.NonEmpty
 import Control.Monad

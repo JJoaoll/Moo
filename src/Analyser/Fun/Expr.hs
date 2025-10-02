@@ -2,11 +2,11 @@
 -- {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
-module Analyser.Expr where
+module Analyser.Fun.Expr where
 
 -- import Check.FunDef.Context
 
-import Analyser.FunContext
+import Analyser.Fun.FunContext
 
 import Grammar.Program
 import Grammar.Expr
