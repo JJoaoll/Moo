@@ -1,3 +1,53 @@
+{-|
+Module      : Analyser.Fun.FunContext.Utils
+Description : Utility functions for function context scope management
+Copyright   : (c) 2025 Moo Language Team
+License     : GPL-3
+Maintainer  : joaoduos@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module provides utilities for managing function analysis contexts.
+
+= Scope Management
+
+Functions for:
+
+* Adding local variable declarations to current scope
+* Entering and exiting nested block scopes  
+* Looking up variables in the scope stack
+* Type checking with function context
+
+= Variable Lookup
+
+Variable resolution follows lexical scoping rules:
+
+1. Search current (top) scope first
+2. Search progressively outer scopes  
+3. Fall back to global context (constants, globals)
+4. Report error if not found
+
+= Block Scope Operations
+
+* 'addDecl': Add variable to current scope
+* 'enterScope': Create new nested scope  
+* 'exitScope': Return to parent scope
+* 'findDecl': Look up variable in scope stack
+
+= Example Usage
+
+@
+-- Add local variable to current scope
+funCtx' <- addDecl \"x\" TInt funCtx
+
+-- Enter new block scope
+let blockCtx = enterScope funCtx'
+
+-- Look up variable  
+maybeType = findDecl \"x\" blockCtx
+@
+-}
+
 module Analyser.Fun.FunContext.Utils where
 
 import Analyser.Context.Def
@@ -20,7 +70,14 @@ import Analyser.Fun.FunContext.Def
 
 import qualified Analyser.Context.Utils as Ctx
 
-
+-- | Type check within function context (same as global context checking).
+--
+-- Validates that types are concrete with no unbound type variables:
+-- * 'TVar': Invalid (no unbound type variables allowed)
+-- * 'TData': Must exist with correct arity  
+-- * Built-in types: Always valid
+--
+-- Uses the global context for type definition lookup.
 -- concrete: 👍; abstract: 👎;
 checkType :: FunContext -> Type -> Either Error ()
 checkType _ (TVar _) = Left Error
@@ -34,6 +91,14 @@ checkType _ _ = pure ()
 
 ---- Block dealer ----
 
+-- | Add a variable declaration to the current (top) scope.
+--
+-- Creates a new declaration in the innermost scope of the function context.
+-- Returns updated context or error if variable already exists in current scope.
+--
+-- @
+-- addDecl \"x\" TInt funCtx  -- Add int variable \"x\" to current scope
+-- @
 addDecl :: Name -> Type -> FunContext -> Either Error FunContext
 addDecl name t funCtx =
   let 

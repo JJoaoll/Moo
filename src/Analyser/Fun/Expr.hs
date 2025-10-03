@@ -2,6 +2,56 @@
 -- {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
+{-|
+Module      : Analyser.Fun.Expr
+Description : Expression type checking within function contexts for Moo language
+Copyright   : (c) 2025 Moo Language Team
+License     : GPL-3
+Maintainer  : joaoduos@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module implements expression type checking within function bodies.
+
+= Function Expression Analysis
+
+Extends global expression checking with local variable support:
+
+* Local variables ('EVar') are resolved through the scope stack
+* All other expressions use similar logic to global context
+* Type unification for generic constructor applications
+* Proper error reporting with variable scope information
+
+= Key Differences from Global Context
+
+Unlike "Analyser.Context.Expr", this module:
+
+* Supports local variable lookup through 'FunContext'
+* Uses scope stack for variable resolution
+* Handles function parameter access
+* Provides detailed error messages for scope issues
+
+= Variable Resolution Order
+
+1. Search local scope stack (innermost to outermost)
+2. Search function parameters  
+3. Search global constants and variables
+4. Report 'VarNotFound' error
+
+= Example Usage
+
+@
+-- Check expression in function context
+result = funCtx \`checkExpr\` (EVar \"localVar\")
+
+-- Type check with local variables
+result2 = funCtx \`checkExpr\` (EBinOp (EVar \"x\") Add (ELit (LInt 1)))
+
+-- Constructor with local variables
+result3 = funCtx \`checkExpr\` (EConstr \"Some\" [EVar \"value\"])
+@
+-}
+
 module Analyser.Fun.Expr where
 
 -- import Check.FunDef.Context
@@ -21,6 +71,28 @@ import Utils
 
 import Control.Monad (forM, forM_)
 
+-- | Type check an expression within function context.
+--
+-- Similar to global expression checking but with local variable support:
+--
+-- [@ELit@] Literal values with constructor type unification
+-- [@EConstr@] Constructor applications with type inference  
+-- [@EVar@] Local variables resolved through scope stack
+-- [@EConst@] Global constants from context
+-- [@EGlobal@] Global variables from context
+-- [@EUnOp@] Unary operations with type validation
+-- [@EBinOp@] Binary operations with type compatibility  
+-- [@EFunCall@] Function calls with arity and type checking
+--
+-- The key difference is 'EVar' support - variables are looked up in:
+-- 1. Local scope stack (innermost to outermost)
+-- 2. Function parameters
+-- 3. Global constants and variables  
+--
+-- @
+-- checkExpr funCtx (EVar \"localVar\")  -- Look up in local scopes
+-- checkExpr funCtx (ELit (LInt 42))     -- Same as global context
+-- @
 -- be right back soon
 checkExpr :: FunContext -> Expr -> Either Error Type
 ctx `checkExpr` (ELit lit) = 
@@ -57,11 +129,20 @@ ctx `checkExpr` (EConstr name args) =
             Nothing -> Left Error
             Just ts -> pure $ TData tName ts
 
+-- | Variable lookup in function context (key difference from global context).
+--
+-- Resolves variables using lexical scoping through the scope stack:
+-- 1. Search local scopes (innermost to outermost)  
+-- 2. Search function parameters
+-- 3. If not found, return 'VarNotFound' error
+--
+-- This enables proper local variable access within function bodies.
 ctx `checkExpr` (EVar name) =
   case ctx `findDecl` name of 
     Nothing -> Left $ VarNotFound name
     Just (Decl{dclType}) -> pure dclType
 
+-- | Global constant lookup (delegates to global context).
 -- pre-process :PP TODO: -- maybe the parser?? no
 ctx `checkExpr` (EConst name) = 
   case ctx `findConstDef` name of 
@@ -69,6 +150,7 @@ ctx `checkExpr` (EConst name) =
     Just (Const{kType}) ->       
       pure kType
 
+-- | Global variable lookup (delegates to global context).
 ctx `checkExpr` (EGlobal name) = 
   case ctx `findGlobalDef` name of 
     Nothing -> Left Error

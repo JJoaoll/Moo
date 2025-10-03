@@ -1,6 +1,68 @@
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
 
+{-|
+Module      : Analyser.Fun.Sttm
+Description : Statement analysis and type checking within Moo function bodies
+Copyright   : (c) 2025 Moo Language Team
+License     : GPL-3
+Maintainer  : joaoduos@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module implements statement-level analysis for Moo function bodies.
+
+= Statement Analysis
+
+Validates all statement types within function contexts:
+
+* Variable operations: declaration ('SInit'), assignment ('SAtrib')
+* I/O operations: output ('SPrint'), input ('SScan')  
+* Control flow: pattern matching ('SMatch'), loops ('SWhile', 'SFor'), returns ('SReturn')
+* Function calls: procedure calls ('SFunCall')
+
+= Context Management
+
+Each statement can modify the function context:
+
+* 'SInit': Adds new variable declaration to current scope
+* Other statements: Generally preserve context unchanged  
+* Control flow: May enter/exit nested scopes (TODO: scope tracking)
+
+= Type Safety
+
+Ensures type correctness for:
+
+* Variable initialization with matching types
+* Assignment to existing variables with compatible types
+* Function calls with correct signatures
+* Pattern matching with comprehensive case analysis
+* Return statements matching function signature
+
+= Error Handling
+
+Reports specific errors for:
+
+* Type mismatches in assignments and initializations
+* Undefined variables and functions
+* Pattern matching failures
+* Control flow type inconsistencies
+
+= Example Usage
+
+@
+-- Check variable declaration
+checkSttm ctx (SInit \"x\" TInt (ELit (LInt 42)))
+
+-- Check assignment  
+checkSttm ctx (SAtrib \"x\" (EBinOp (EVar \"x\") Add (ELit (LInt 1))))
+
+-- Check pattern matching
+checkSttm ctx (SMatch (EVar \"option\") 
+               [(PConstructor \"Some\" [PVar \"value\"], [SPrint (EVar \"value\")])])
+@
+-}
+
 module Analyser.Fun.Sttm where
 
 import Grammar.Type
@@ -15,6 +77,27 @@ import Analyser.Fun.FunContext.Utils
 import Control.Monad
 import Control.Lens hiding (Context)
 
+-- | Check a statement and return updated function context.
+--
+-- Validates statement type correctness and updates context as needed:
+--
+-- [@SInit@] Variable declaration - adds to local scope if types match
+-- [@SAtrib@] Variable assignment - checks compatibility with existing declaration
+-- [@SPrint@] Output statement - validates expression type  
+-- [@SScan@] Input statement - validates type is concrete
+-- [@SFunCall@] Function call - checks function exists with correct signature
+-- [@SMatch@] Pattern matching - validates all cases comprehensively
+-- [@SWhile@] While loop - checks condition and body statements
+-- [@SFor@] For loop - validates iterable and body with loop variable
+-- [@SReturn@] Return statement - ensures type matches function signature
+--
+-- Most statements preserve the context unchanged, except 'SInit' which adds
+-- new variable declarations to the current scope.
+--
+-- @
+-- checkSttm ctx (SInit \"x\" TInt (ELit (LInt 42)))  -- Adds \"x\" to scope
+-- checkSttm ctx (SPrint (EVar \"x\"))                -- Context unchanged
+-- @
 checkSttm :: FunContext -> Sttm -> Either Error FunContext
 ctx `checkSttm` (SInit name typε expr) = do 
   exprType <- ctx `checkExpr` expr
@@ -68,7 +151,6 @@ ctx `checkSttm` (SFor i is body) = do
       newCtx <- ctx & enterBlock & addDecl i a
       ctx <$ foldM checkSttm newCtx body
     _ -> Left Error
-
 
 ctx `checkSttm` (SReturn expr) = do
   exprType <- ctx `checkExpr` expr

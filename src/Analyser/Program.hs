@@ -1,6 +1,50 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
 
+{-|
+Module      : Analyser.Program
+Description : Program-level analysis and type checking for Moo programs
+Copyright   : (c) 2025 Moo Language Team
+License     : GPL-3
+Maintainer  : joaoduos@gmail.com
+Stability   : experimental
+Portability : POSIX
+
+This module implements the top-level program analyser for Moo.
+
+= Analysis Pipeline
+
+The program analysis follows these steps:
+
+1. __Main Function Check__: Verify that a 'main' function exists
+2. __Type Definition Check__: Validate all custom type definitions
+3. __Context Creation__: Build analysis context from global definitions
+4. __Global/Constant Check__: Verify global variables and constants
+5. __Function Check__: Type check all function definitions
+
+= Error Handling
+
+Analysis uses 'Either' 'Error' for failure cases:
+
+* Missing main function → 'FunNotFound' \"main\"
+* Type mismatches → 'Error' (generic)
+* Invalid constants → 'Error' (non-literal values)
+
+= Example Usage
+
+@
+-- Analyse a complete program
+result = checkProgram myProgram
+case result of
+  Left err -> putStrLn $ "Analysis failed: " ++ show err
+  Right () -> putStrLn "Program is well-typed"
+
+-- Check individual components  
+checkGlobal ctx globalVar
+checkConst ctx constantDef
+@
+-}
+
 module Analyser.Program where
   
 import Grammar.Expr
@@ -18,6 +62,22 @@ import Control.Monad
 
 import qualified Data.List as L
 
+-- | Main program analysis function.
+-- 
+-- Performs complete type checking and validation of a Moo program:
+--
+-- 1. Checks for required 'main' function
+-- 2. Validates all type definitions
+-- 3. Creates analysis context
+-- 4. Type checks global variables and constants  
+-- 5. Type checks all function definitions
+--
+-- Returns 'Left' 'Error' on any analysis failure, 'Right' '()' on success.
+--
+-- @
+-- checkProgram (Program [mainFun] [] [] []) = Right ()
+-- checkProgram (Program [] [] [] []) = Left (FunNotFound \"main\")
+-- @
   -- = L.find (fName ||> (==name)) getFunDefs
 checkProgram :: Program -> Either Error ()
 checkProgram Program{..} = do
@@ -41,6 +101,16 @@ checkProgram Program{..} = do
   forM_ pFuns (ctx `checkFun`)
 
 
+-- | Check a global variable definition.
+--
+-- Validates that:
+-- * The expression type matches the declared type
+-- * Both expression and type are well-formed
+--
+-- @
+-- checkGlobal ctx (Global \"x\" TInt (ELit (LInt 42)))  -- Valid
+-- checkGlobal ctx (Global \"y\" TInt (ELit (LString \"hello\")))  -- Type mismatch
+-- @
 -- TODO: separate them
 checkGlobal :: Context -> GlobalDef -> Either Error ()
 ctx `checkGlobal` Global{..} = do
@@ -48,6 +118,16 @@ ctx `checkGlobal` Global{..} = do
   ctx `checkType` gType 
   unless (gType == exprType) $ Left Error
 
+-- | Check a constant definition.
+--
+-- Validates that:
+-- * The value is a literal expression (compile-time constant)
+-- * The expression type matches the declared type
+--
+-- @
+-- checkConst ctx (Const \"PI\" TReal (ELit (LReal 3.14)))  -- Valid literal
+-- checkConst ctx (Const \"X\" TInt (EVar \"someVar\"))     -- Invalid: not literal
+-- @
 -- only literal constants?
 checkConst :: Context -> ConstDef -> Either Error ()
 ctx `checkConst` Const{..} =
