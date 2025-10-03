@@ -2,7 +2,7 @@
 Module      : Analyser.Error
 Description : Error types and success indicators for Moo language analysis
 Copyright   : (c) 2025 Moo Language Team
-License     : GPL-3
+License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
 Portability : POSIX

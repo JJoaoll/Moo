@@ -6,7 +6,7 @@
 Module      : Analyser.Fun.Expr
 Description : Expression type checking within function contexts for Moo language
 Copyright   : (c) 2025 Moo Language Team
-License     : GPL-3
+License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
 Portability : POSIX

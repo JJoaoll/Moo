@@ -1,7 +1,7 @@
 # 🐄 Moo Programming Language
 
 [![Haskell](https://img.shields.io/badge/Haskell-9.8.4-5e5086?style=flat&logo=haskell)](https://www.haskell.org/)
-[![License](https://img.shields.io/badge/License-GPL--3-blue.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
 
 **Moo** is a statically-typed imperative programming language with rich algebraic data types, built in Haskell. It combines the safety of static typing with the expressiveness of algebraic data types and comprehensive pattern matching programming.
@@ -67,12 +67,12 @@ cabal run
 ```moo
 -- Factorial function with imperative style
 fun fact(n: Int) -> Int do
-    let result: Int = 1
-    let i: Int = 1
+    let result: Int := 1
+    let i: Int := 1
     
     while i <= n do
-        result = result * i
-        i = i + 1
+        result := result * i
+        i := i + 1
     end-while
     
     return result
@@ -98,12 +98,12 @@ end-safeHead
 
 -- entry point: function main
 fun main() -> Int do
-    let x: Int = 5
-    let result: Int = factorial(x)
+    let x: Int := 5
+    let result: Int := factorial(x)
     print(result)
     
-    let numbers: List Int = [1, 2, 3, 4, 5]
-    let head: Option Int = safeHead(numbers)
+    let numbers: List Int := [1, 2, 3, 4, 5]
+    let head: Option Int := safeHead(numbers)
     
     match head with
         Some value do print(value) end-case
@@ -118,15 +118,16 @@ end-main
 
 ### Variable Declaration & Assignment
 ```moo
-let x: Int = 42           -- Variable declaration with type annotation (mutable by default)
-x = x + 1                 -- Mutable assignment 
+let x: Int := 42          -- Variable declaration with type annotation (mutable by default)
+x := x + 1                -- Mutable assignment (imperative style)
+let y: Int := 0           -- All variables declared with 'let' are mutable
 ```
 
 ### Function Definitions
 ```moo
 -- Functions are procedures that can modify state
 fun add(x: Int, y: Int) -> Int do 
-    let result: Int = x + y
+    let result: Int := x + y
     return result
 end-add
 ```
@@ -328,7 +329,7 @@ We welcome contributions! Please:
 
 ## 📄 License
 
-This project is licensed under the **GNU General Public License v3.0** - see the [LICENSE](LICENSE) file for details.
+This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) file for details.
 
 ## 👨‍💻 Author
 
@@ -349,6 +350,6 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 **Built with ❤️ and Haskell**
 
-*Moo - Imperative programming with rich algebraic types* 🐄
+*Moo - Where imperative meets good* 🐄
 
 </div>

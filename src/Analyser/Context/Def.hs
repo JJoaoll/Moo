@@ -5,7 +5,7 @@
 Module      : Analyser.Context.Def
 Description : Analysis context and declaration definitions for Moo type checking
 Copyright   : (c) 2025 Moo Language Team
-License     : GPL-3
+License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
 Portability : POSIX

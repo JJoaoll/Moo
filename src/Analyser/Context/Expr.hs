@@ -2,7 +2,7 @@
 Module      : Analyser.Context.Expr
 Description : Expression type checking and inference for Moo language
 Copyright   : (c) 2025 Moo Language Team
-License     : GPL-3
+License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
 Portability : POSIX

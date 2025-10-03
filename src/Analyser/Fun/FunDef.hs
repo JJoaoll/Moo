@@ -4,7 +4,7 @@
 Module      : Analyser.Fun.FunDef
 Description : Function definition analysis and type checking for Moo functions
 Copyright   : (c) 2025 Moo Language Team
-License     : GPL-3
+License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
 Portability : POSIX

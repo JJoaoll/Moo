@@ -7,7 +7,7 @@
 Module      : Analyser.TypeDef
 Description : Type definition analysis and validation for Moo custom types
 Copyright   : (c) 2025 Moo Language Team
-License     : GPL-3
+License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
 Portability : POSIX
