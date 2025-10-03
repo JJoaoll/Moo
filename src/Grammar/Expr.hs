@@ -40,8 +40,8 @@ import Utils
 
 -- import Data.List.NonEmpty
 
--- l = [1, 2]
--- l = 1::2::[]
+-- l := [1, 2]
+-- l := 1::2::[]
 -- ELit $ LConstr
 -- LConstr "Cons" [1, LConstr "Cons" [2, LConstr "Nil" []]]
 -- "True" --> ELit (LConstr "True" [])

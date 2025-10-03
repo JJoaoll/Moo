@@ -30,9 +30,9 @@ Patterns are used in 'SMatch' statements for destructuring and conditional execu
 = Example Usage
 
 @
--- Variable declaration and assignment
-initStmt = SInit "x" TInt (ELit (LInt 42))
-assignStmt = SAtrib "x" (EBinOp (EVar "x") Add (ELit (LInt 1)))
+-- Variable declaration and assignment  
+initStmt = SInit "x" TInt (ELit (LInt 42))    -- let x: Int := 42
+assignStmt = SAtrib "x" (EBinOp (EVar "x") Add (ELit (LInt 1)))  -- x := x + 1
 
 -- Pattern matching on option type
 matchStmt = SMatch (EVar "result")
@@ -42,7 +42,7 @@ matchStmt = SMatch (EVar "result")
 
 -- Loop constructs  
 whileStmt = SWhile (EBinOp (EVar "i") Lt (ELit (LInt 10))) 
-  [SAtrib "i" (EBinOp (EVar "i") Add (ELit (LInt 1)))]
+  [SAtrib "i" (EBinOp (EVar "i") Add (ELit (LInt 1)))]  -- i := i + 1
   
 forStmt = SFor "item" (EVar "items") [SPrint (EVar "item")]
 @
@@ -64,10 +64,10 @@ type Sttms = [Sttm]
 -- Statements represent imperative actions that modify program state:
 --
 -- [@SInit@] Variable declaration with initial value:
---   'SInit' \"x\" 'TInt' ('ELit' ('LInt' 42))
+--   'SInit' \"x\" 'TInt' ('ELit' ('LInt' 42))  -- represents: let x: Int := 42
 --
 -- [@SAtrib@] Variable assignment (mutation):
---   'SAtrib' \"x\" ('EBinOp' ('EVar' \"x\") 'Add' ('ELit' ('LInt' 1)))
+--   'SAtrib' \"x\" ('EBinOp' ('EVar' \"x\") 'Add' ('ELit' ('LInt' 1)))  -- represents: x := x + 1
 --
 -- [@SPrint@] Output expression value to console:
 --   'SPrint' ('ELit' ('LString' \"Hello, World!\"))

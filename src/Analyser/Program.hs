@@ -108,7 +108,7 @@ checkProgram Program{..} = do
 -- * Both expression and type are well-formed
 --
 -- @
--- checkGlobal ctx (Global \"x\" TInt (ELit (LInt 42)))  -- Valid
+-- checkGlobal ctx (Global \"x\" TInt (ELit (LInt 42)))  -- Valid (global x: Int := 42)
 -- checkGlobal ctx (Global \"y\" TInt (ELit (LString \"hello\")))  -- Type mismatch
 -- @
 -- TODO: separate them
@@ -125,7 +125,7 @@ ctx `checkGlobal` Global{..} = do
 -- * The expression type matches the declared type
 --
 -- @
--- checkConst ctx (Const \"PI\" TReal (ELit (LReal 3.14)))  -- Valid literal
+-- checkConst ctx (Const \"PI\" TReal (ELit (LReal 3.14)))  -- Valid literal (const PI := 3.14)
 -- checkConst ctx (Const \"X\" TInt (EVar \"someVar\"))     -- Invalid: not literal
 -- @
 -- only literal constants?

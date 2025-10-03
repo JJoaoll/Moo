@@ -54,33 +54,33 @@ data Program = Program
   , pTypes   :: [TypeDef]    -- ^ Type definitions
   } deriving (Eq, Show)
 
--- @global abelha: Int = fib(5)
+-- @global abelha: Int := fib(5)
 -- | Global variable definition
 --
--- Syntax: @global _varName_ : _TypeName_ = _expr_
+-- Syntax: @global _varName_ : _TypeName_ := _expr_
 --
 -- === Example
 -- @
 -- Global "abelha" TInt (EFunCall "fib" [ELit (LInt 5)]) 
 -- @
 --
--- Represents: @global abelha: Int = fib(5)@
+-- Represents: @global abelha: Int := fib(5)@
 data GlobalDef = Global 
   { gName :: Name  -- ^ Variable name
   , gType :: Type  -- ^ Variable type
   , gExpr :: Expr  -- ^ Initialization expression
   } deriving (Eq, Show)
 
--- <const> flag = "-hfsh--trace-show special"
+-- <const> flag := "-hfsh--trace-show special"
 -- | Constant definition (must be a literal value)
 --
--- Syntax: <const> _constName_ = _litExpr_
+-- Syntax: <const> _constName_ := _litExpr_
 --
 -- === Example
 -- @
 -- Const "flag" TString (ELit (LString "-hfsh--trace-show special"))
 -- @
--- Represents: @const flag = "-hfsh--trace-show special"@
+-- Represents: @const flag := "-hfsh--trace-show special"@
 data ConstDef = Const 
   { kName :: Name  -- ^ Constant name
   , kType :: Type  -- ^ Constant type

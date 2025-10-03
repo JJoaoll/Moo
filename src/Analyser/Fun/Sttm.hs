@@ -51,10 +51,10 @@ Reports specific errors for:
 = Example Usage
 
 @
--- Check variable declaration
+-- Check variable declaration (let x: Int := 42)
 checkSttm ctx (SInit \"x\" TInt (ELit (LInt 42)))
 
--- Check assignment  
+-- Check assignment (x := x + 1)
 checkSttm ctx (SAtrib \"x\" (EBinOp (EVar \"x\") Add (ELit (LInt 1))))
 
 -- Check pattern matching
@@ -95,7 +95,7 @@ import Control.Lens hiding (Context)
 -- new variable declarations to the current scope.
 --
 -- @
--- checkSttm ctx (SInit \"x\" TInt (ELit (LInt 42)))  -- Adds \"x\" to scope
+-- checkSttm ctx (SInit \"x\" TInt (ELit (LInt 42)))  -- Adds \"x\" to scope (let x: Int := 42)
 -- checkSttm ctx (SPrint (EVar \"x\"))                -- Context unchanged
 -- @
 checkSttm :: FunContext -> Sttm -> Either Error FunContext
