@@ -54,7 +54,7 @@ end-def
 ```bash
 # Clone the repository
 git clone https://github.com/JJoaoll/miti.git
-cd miti
+cd Moo 
 
 # Build the project
 cabal build
