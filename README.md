@@ -53,7 +53,7 @@ end-def
 ### Installation
 ```bash
 # Clone the repository
-git clone https://github.com/JJoaoll/miti.git
+git clone https://github.com/JJoaoll/Moo.git
 cd Moo 
 
 # Build the project
