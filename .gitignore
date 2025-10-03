@@ -1,0 +1,45 @@
+# Haskell build artifacts
+dist/
+dist-newstyle/
+.stack-work/
+
+# Haddock documentation
+doc/
+docs/
+*.html
+haddock/
+
+# GHC generated files
+*.hi
+*.o
+*.dyn_hi
+*.dyn_o
+*.prof
+
+# Cabal sandbox
+.cabal-sandbox/
+cabal.sandbox.config
+
+# Stack
+.stack-work/
+stack.yaml.lock
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Temporary files
+*.tmp
+*.bak
