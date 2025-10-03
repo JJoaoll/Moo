@@ -4,34 +4,35 @@
 [![License](https://img.shields.io/badge/License-GPL--3-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
 
-**Moo** is a statically-typed functional programming language with imperative features, built in Haskell. It combines the safety of static typing with the expressiveness of algebraic data types and pattern matching.
+**Moo** is a statically-typed imperative programming language with rich algebraic data types, built in Haskell. It combines the safety of static typing with the expressiveness of algebraic data types and comprehensive pattern matching for imperative programming.
 
 ## ✨ Features
 
 ### 🔧 **Core Language Features**
-- **Static Type System** with type inference
-- **Algebraic Data Types** with custom constructors
-- **Pattern Matching** with comprehensive case analysis
-- **First-class Functions** with proper closures
-- **Imperative Constructs** (variables, loops, I/O)
-- **Generic Types** with type parameter unification
+- **Static Type System** with comprehensive type checking
+- **Rich Algebraic Data Types** with custom constructors and type parameters
+- **Inductive Types** supporting recursive data structures
+- **Pattern Matching** with exhaustive case analysis
+- **Imperative Programming** with mutable variables and sequential execution
+- **Control Flow Constructs** (loops, conditionals, early returns)
+- **Generic Types** with type parameter unification and inference
 
 ### 🏗️ **Language Constructs**
-- **Data Types**: Integers, Characters, Floats, Booleans, Lists, Custom ADTs
-- **Expressions**: Literals, Variables, Binary/Unary Operations, Function Calls
-- **Statements**: Variable Declaration/Assignment, I/O, Control Flow, Pattern Matching
-- **Functions**: Parameter lists, return types, local scoping
-- **Pattern Matching**: Literal, Variable, Wildcard, and Constructor patterns
+- **Data Types**: Integers, Characters, Floats, Booleans, Lists, Custom Algebraic Types
+- **Expressions**: Literals, Variables, Binary/Unary Operations, Function Calls, Constructors
+- **Statements**: Variable Declaration/Assignment, I/O Operations, Control Flow, Pattern Matching
+- **Functions**: Procedures with parameter lists, return types, local scoping
+- **Pattern Matching**: Literal, Variable, Wildcard, and Constructor patterns for data destructuring
 
 ### 🧮 **Built-in Types**
 ```moo
--- Basic types
+-- Primitive types
 TInt, TChar, TFloat, TBool
 
--- Composite types  
+-- Composite types with type parameters
 TList a, TOption a
 
--- Custom algebraic data types
+-- Custom algebraic data types (inductive types)
 data Tree a = Leaf a | Node (Tree a) a (Tree a)
 data Result a b = Ok a | Error b
 ```
@@ -57,15 +58,20 @@ cabal run
 
 ### Example Program
 ```moo
--- Factorial function with pattern matching
+-- Factorial function with imperative style
 fun factorial(n: Int) -> Int {
-    match n {
-        0 -> 1,
-        n -> n * factorial(n - 1)
+    let result: Int = 1;
+    let i: Int = 1;
+    
+    while i <= n {
+        result = result * i;
+        i = i + 1;
     }
+    
+    return result;
 }
 
--- List processing with custom types
+-- List processing with algebraic data types
 data Option a = None | Some a
 
 fun safeHead(list: List Int) -> Option Int {
@@ -75,10 +81,20 @@ fun safeHead(list: List Int) -> Option Int {
     }
 }
 
--- Main function
+-- Main function with imperative flow
 fun main() -> Int {
-    let result = factorial(5);
+    let x: Int = 5;
+    let result: Int = factorial(x);
     print(result);
+    
+    let numbers: List Int = [1, 2, 3, 4, 5];
+    let head: Option Int = safeHead(numbers);
+    
+    match head {
+        Some value -> print(value),
+        None -> print("Empty list")
+    }
+    
     return 0;
 }
 ```
@@ -87,22 +103,32 @@ fun main() -> Int {
 
 ### Variable Declaration & Assignment
 ```moo
-let x: Int = 42;           -- Declaration with type annotation
-x = x + 1;                 -- Assignment
+let x: Int = 42;           -- Variable declaration with type annotation
+x = x + 1;                 -- Mutable assignment (imperative style)
+let mut y: Int = 0;        -- Explicit mutable variable declaration
 ```
 
 ### Function Definitions
 ```moo
+-- Functions are procedures that can modify state
 fun add(x: Int, y: Int) -> Int {
-    return x + y;
+    let result: Int = x + y;
+    return result;
 }
 ```
 
 ### Pattern Matching
 ```moo
+-- Pattern matching for algebraic data types
 match expression {
-    pattern1 -> result1,
-    pattern2 -> result2,
+    pattern1 -> {
+        statements;
+        result1
+    },
+    pattern2 -> {
+        statements;
+        result2
+    },
     _ -> defaultResult
 }
 ```
@@ -114,17 +140,28 @@ while condition {
     statements;
 }
 
--- For loops
+-- For loops with mutable iteration
 for item in list {
     print(item);
 }
+
+-- Conditional statements
+if condition {
+    statements;
+} else {
+    otherStatements;
+}
 ```
 
-### Custom Data Types
+### Custom Algebraic Data Types
 ```moo
+-- Inductive types with multiple constructors
 data BinaryTree a = 
     | Empty 
     | Node a (BinaryTree a) (BinaryTree a)
+
+-- Recursive data structures
+data List a = Nil | Cons a (List a)
 ```
 
 ## 🏛️ Architecture
@@ -151,33 +188,34 @@ src/
 ### Core Components
 
 #### 🧠 **Type System** (`Grammar.Type`)
-- Supports primitive types (`TInt`, `TChar`, `TFloat`, `TBool`)
-- Generic types with type variables (`TVar`)
-- Algebraic data types (`TData`)
-- Built-in composite types (`TList`, `TOption`)
+- Rich primitive types (`TInt`, `TChar`, `TFloat`, `TBool`)
+- Generic types with type variables (`TVar`) for parametric polymorphism
+- Algebraic data types (`TData`) supporting sum and product types
+- Inductive types enabling recursive data structures
+- Built-in composite types (`TList`, `TOption`) with type parameters
 
 #### 🔍 **Semantic Analyser** (`Analyser.*`)
-- **Program Analysis**: Validates complete programs
-- **Type Checking**: Ensures type safety across all constructs
-- **Scope Management**: Handles local/global variable resolution
-- **Pattern Analysis**: Validates pattern matching completeness
+- **Program Analysis**: Validates complete imperative programs
+- **Type Checking**: Ensures type safety for mutable variables and operations
+- **Scope Management**: Handles variable mutability and local/global resolution
+- **Pattern Analysis**: Validates exhaustive pattern matching on algebraic types
 
 #### 🏃 **Function Analysis** (`Analyser.Fun.*`)
-- **Local Scoping**: Variable declaration and lookup
-- **Type Inference**: Expression type inference within functions
-- **Control Flow**: Statement sequence validation
-- **Return Analysis**: Ensures proper return type matching
+- **Imperative Scoping**: Mutable variable declaration and assignment tracking
+- **Type Inference**: Expression type inference with mutation constraints
+- **Control Flow**: Statement sequence validation for imperative constructs
+- **Return Analysis**: Ensures proper return type matching in all execution paths
 
 ## 🔬 Technical Details
 
 ### Type Checking Algorithm
 The Moo compiler implements a **bidirectional type checking** system:
 
-1. **Context Construction**: Build global context with types, functions, constants
-2. **Type Validation**: Ensure all type definitions are well-formed
-3. **Expression Inference**: Infer types for expressions with unification
-4. **Statement Checking**: Validate statements preserve type invariants
-5. **Pattern Analysis**: Ensure pattern completeness and type consistency
+1. **Context Construction**: Build global context with types, procedures, constants
+2. **Type Validation**: Ensure all algebraic type definitions are well-formed and support induction
+3. **Expression Inference**: Infer types for expressions with unification and mutation tracking
+4. **Statement Checking**: Validate imperative statements preserve type invariants and mutability rules
+5. **Pattern Analysis**: Ensure pattern completeness and type consistency for algebraic data types
 
 ### Error Handling
 Comprehensive error reporting with specific error types:
@@ -237,12 +275,13 @@ dependencies:
 
 ## 🎯 Roadmap
 
-### Current Status: **Core Type System ✅**
-- [x] AST definitions
-- [x] Type checking infrastructure
-- [x] Semantic analysis
-- [x] Pattern matching validation
-- [x] Function analysis
+### Current Status: **Core Type System & Imperative Analysis ✅**
+- [x] AST definitions for imperative constructs
+- [x] Rich algebraic type system with inductive types
+- [x] Type checking infrastructure for mutable variables
+- [x] Semantic analysis for imperative programs
+- [x] Pattern matching validation for algebraic data types
+- [x] Function analysis with imperative scoping
 - [x] Comprehensive documentation
 
 ### Next Milestones:
@@ -292,6 +331,6 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 **Built with ❤️ and Haskell**
 
-*Moo - Where functional meets practical* 🐄
+*Moo - Where imperative meets good* 🐄
 
 </div>
