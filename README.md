@@ -66,7 +66,7 @@ cabal run
 ### Example Program
 ```moo
 -- Factorial function with imperative style
-fun factorial(n: Int) -> Int do
+fun fact(n: Int) -> Int do
   let result: Int = 1
   let i: Int = 1
   
