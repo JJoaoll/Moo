@@ -34,13 +34,13 @@ TList a, TOption a
 
 -- Custom algebraic data types (inductive types)
 type Tree(a) def
-  Leaf(a)
-  Node(Tree(a), a, Tree(a))
+    Leaf(a)
+    Node(Tree(a), a, Tree(a))
 end-def
 
 type Result(a, b) def
-  Ok(a)
-  Error(b)
+    Ok(a)
+    Error(b)
 end-def
 ```
 
@@ -67,45 +67,50 @@ cabal run
 ```moo
 -- Factorial function with imperative style
 fun fact(n: Int) -> Int do
-  let result: Int = 1
-  let i: Int = 1
-  
-  while i <= n do
-    result = result * i
-    i = i + 1
-  end-while
-  
-  return result
+    let result: Int = 1
+    let i: Int = 1
+    
+    while i <= n do
+        result = result * i
+        i = i + 1
+    end-while
+    
+    return result
 end-factorial
 
 -- List processing with algebraic data types
 type Option(a) def
-  None
-  Some(a)
+    None
+    Some(a)
 end-def
 
 fun safeHead(list: List Int) -> Option Int do
-  match list with
-    [] do None end-case
-    x::xs do Some x end-case
-  end-match
+    match list with
+        [] do 
+            return None 
+        end-case
+
+        x::xs do 
+            return (Some x) 
+        end-case
+    end-match
 end-safeHead
 
--- Main function with imperative flow
+-- entry point: function main
 fun main() -> Int do
-  let x: Int = 5
-  let result: Int = factorial(x)
-  print(result)
-  
-  let numbers: List Int = [1, 2, 3, 4, 5]
-  let head: Option Int = safeHead(numbers)
-  
-  match head with
-    Some value do print(value) end-case
-    None do print("Empty list") end-case
-  end-match
-  
-  return 0
+    let x: Int = 5
+    let result: Int = factorial(x)
+    print(result)
+    
+    let numbers: List Int = [1, 2, 3, 4, 5]
+    let head: Option Int = safeHead(numbers)
+    
+    match head with
+        Some value do print(value) end-case
+        None do print("Empty list") end-case
+    end-match
+    
+    return 0
 end-main
 ```
 
@@ -121,8 +126,8 @@ x = x + 1                 -- Mutable assignment
 ```moo
 -- Functions are procedures that can modify state
 fun add(x: Int, y: Int) -> Int do 
-  let result: Int = x + y
-  return result
+    let result: Int = x + y
+    return result
 end-add
 ```
 
@@ -130,17 +135,15 @@ end-add
 ```moo
 -- Pattern matching for algebraic data types
 match expression with
-  pattern1 do 
-    statements
-    result1
-  end-case 
-  pattern2 do
-    statements
-    result2
-  end-case 
-  otherwise do 
-    defaultResult
-  end-case
+    pattern0 do 
+        sttms0
+    end-case 
+    pattern1 do
+        sttms1
+    end-case 
+    otherwise do 
+        sttms2
+    end-case
 end-match
 ```
 
@@ -148,19 +151,19 @@ end-match
 ```moo
 -- While loops
 while condition do
-  statements
+    statements
 end-while
 
 -- For loops with iteration
 for i in items do
-  print(i)
+    print(i)
 end-for
 
 -- Conditional statements
 if condition then
-  statements
+    statements
 else 
-  otherStatements
+    otherStatements
 end-if
 ```
 
@@ -168,14 +171,14 @@ end-if
 ```moo
 -- Inductive types with multiple constructors
 type BinTree(a, b) def
-  Leaf(a)
-  Branch(BinTree(a, b), b, BinTree(a, b))
+    Leaf(a)
+    Branch(BinTree(a, b), b, BinTree(a, b))
 end-def
 
 -- Recursive data structures
 type List(a) def 
-  Nil 
-  Cons(a, List(a))
+    Nil 
+    Cons(a, List(a))
 end-def
 ```
 
@@ -210,7 +213,7 @@ src/
 - Built-in composite types (`TList`, `TOption`) with type parameters
 
 #### 🔍 **Semantic Analyser** (`Analyser.*`)
-- **Program Analysis**: Validates complete imperative programs
+- **Program Analysis**: Validates complete programs
 - **Type Checking**: Ensures type safety for mutable variables and operations
 - **Scope Management**: Handles variable mutability and local/global resolution
 - **Pattern Analysis**: Validates exhaustive pattern matching on algebraic types
@@ -218,7 +221,7 @@ src/
 #### 🏃 **Function Analysis** (`Analyser.Fun.*`)
 - **Imperative Scoping**: Mutable variable declaration and assignment tracking
 - **Type Inference**: Expression type inference with mutation constraints
-- **Control Flow**: Statement sequence validation for imperative constructs
+- **Control Flow**: Statement sequence validation for constructs
 - **Return Analysis**: Ensures proper return type matching in all execution paths
 
 ## 🔬 Technical Details
@@ -229,7 +232,7 @@ The Moo compiler implements a **bidirectional type checking** system:
 1. **Context Construction**: Build global context with types, procedures, constants
 2. **Type Validation**: Ensure all algebraic type definitions are well-formed and support induction
 3. **Expression Inference**: Infer types for expressions with unification and mutation tracking
-4. **Statement Checking**: Validate imperative statements preserve type invariants and mutability rules
+4. **Statement Checking**: Validate statements preserve type invariants and mutability rules
 5. **Pattern Analysis**: Ensure pattern completeness and type consistency for algebraic data types
 
 ### Error Handling
@@ -291,12 +294,12 @@ dependencies:
 ## 🎯 Roadmap
 
 ### Current Status: **Core Type System & Imperative Analysis ✅**
-- [x] AST definitions for imperative constructs
+- [x] AST definitions for constructs
 - [x] Rich algebraic type system with inductive types
 - [x] Type checking infrastructure for mutable variables
-- [x] Semantic analysis for imperative programs
+- [x] Semantic analysis for programs
 - [x] Pattern matching validation for algebraic data types
-- [x] Function analysis with imperative scoping
+- [x] Function analysis with scoping
 - [x] Comprehensive documentation
 
 ### Next Milestones:
