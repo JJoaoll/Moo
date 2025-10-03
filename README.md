@@ -4,7 +4,7 @@
 [![License](https://img.shields.io/badge/License-GPL--3-blue.svg)](LICENSE)
 [![Build Status](https://img.shields.io/badge/Build-Passing-brightgreen.svg)]()
 
-**Moo** is a statically-typed imperative programming language with rich algebraic data types, built in Haskell. It combines the safety of static typing with the expressiveness of algebraic data types and comprehensive pattern matching for imperative programming.
+**Moo** is a statically-typed imperative programming language with rich algebraic data types, built in Haskell. It combines the safety of static typing with the expressiveness of algebraic data types and comprehensive pattern matching programming.
 
 ## ✨ Features
 
@@ -33,8 +33,15 @@ TInt, TChar, TFloat, TBool
 TList a, TOption a
 
 -- Custom algebraic data types (inductive types)
-data Tree a = Leaf a | Node (Tree a) a (Tree a)
-data Result a b = Ok a | Error b
+type Tree(a) def
+  Leaf(a)
+  Node(Tree(a), a, Tree(a))
+end-def
+
+type Result(a, b) def
+  Ok(a)
+  Error(b)
+end-def
 ```
 
 ## 🚀 Quick Start
@@ -59,109 +66,117 @@ cabal run
 ### Example Program
 ```moo
 -- Factorial function with imperative style
-fun factorial(n: Int) -> Int {
-    let result: Int = 1;
-    let i: Int = 1;
-    
-    while i <= n {
-        result = result * i;
-        i = i + 1;
-    }
-    
-    return result;
-}
+fun factorial(n: Int) -> Int do
+  let result: Int = 1
+  let i: Int = 1
+  
+  while i <= n do
+    result = result * i
+    i = i + 1
+  end-while
+  
+  return result
+end-factorial
 
 -- List processing with algebraic data types
-data Option a = None | Some a
+type Option(a) def
+  None
+  Some(a)
+end-def
 
-fun safeHead(list: List Int) -> Option Int {
-    match list {
-        [] -> None,
-        x::xs -> Some x
-    }
-}
+fun safeHead(list: List Int) -> Option Int do
+  match list with
+    [] do None end-case
+    x::xs do Some x end-case
+  end-match
+end-safeHead
 
 -- Main function with imperative flow
-fun main() -> Int {
-    let x: Int = 5;
-    let result: Int = factorial(x);
-    print(result);
-    
-    let numbers: List Int = [1, 2, 3, 4, 5];
-    let head: Option Int = safeHead(numbers);
-    
-    match head {
-        Some value -> print(value),
-        None -> print("Empty list")
-    }
-    
-    return 0;
-}
+fun main() -> Int do
+  let x: Int = 5
+  let result: Int = factorial(x)
+  print(result)
+  
+  let numbers: List Int = [1, 2, 3, 4, 5]
+  let head: Option Int = safeHead(numbers)
+  
+  match head with
+    Some value do print(value) end-case
+    None do print("Empty list") end-case
+  end-match
+  
+  return 0
+end-main
 ```
 
 ## 📖 Language Syntax
 
 ### Variable Declaration & Assignment
 ```moo
-let x: Int = 42;           -- Variable declaration with type annotation
-x = x + 1;                 -- Mutable assignment (imperative style)
-let mut y: Int = 0;        -- Explicit mutable variable declaration
+let x: Int = 42           -- Variable declaration with type annotation (mutable by default)
+x = x + 1                 -- Mutable assignment 
 ```
 
 ### Function Definitions
 ```moo
 -- Functions are procedures that can modify state
-fun add(x: Int, y: Int) -> Int {
-    let result: Int = x + y;
-    return result;
-}
+fun add(x: Int, y: Int) -> Int do 
+  let result: Int = x + y
+  return result
+end-add
 ```
 
 ### Pattern Matching
 ```moo
 -- Pattern matching for algebraic data types
-match expression {
-    pattern1 -> {
-        statements;
-        result1
-    },
-    pattern2 -> {
-        statements;
-        result2
-    },
-    _ -> defaultResult
-}
+match expression with
+  pattern1 do 
+    statements
+    result1
+  end-case 
+  pattern2 do
+    statements
+    result2
+  end-case 
+  otherwise do 
+    defaultResult
+  end-case
+end-match
 ```
 
 ### Control Flow
 ```moo
 -- While loops
-while condition {
-    statements;
-}
+while condition do
+  statements
+end-while
 
--- For loops with mutable iteration
-for item in list {
-    print(item);
-}
+-- For loops with iteration
+for i in items do
+  print(i)
+end-for
 
 -- Conditional statements
-if condition {
-    statements;
-} else {
-    otherStatements;
-}
+if condition then
+  statements
+else 
+  otherStatements
+end-if
 ```
 
 ### Custom Algebraic Data Types
 ```moo
 -- Inductive types with multiple constructors
-data BinaryTree a = 
-    | Empty 
-    | Node a (BinaryTree a) (BinaryTree a)
+type BinTree(a, b) def
+  Leaf(a)
+  Branch(BinTree(a, b), b, BinTree(a, b))
+end-def
 
 -- Recursive data structures
-data List a = Nil | Cons a (List a)
+type List(a) def 
+  Nil 
+  Cons(a, List(a))
+end-def
 ```
 
 ## 🏛️ Architecture
@@ -331,6 +346,6 @@ This project is licensed under the **GNU General Public License v3.0** - see the
 
 **Built with ❤️ and Haskell**
 
-*Moo - Where imperative meets good* 🐄
+*Moo - Imperative programming with rich algebraic types* 🐄
 
 </div>
