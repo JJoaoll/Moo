@@ -3,7 +3,7 @@
 {-|
 Module      : Grammar.Program
 Description : Core AST definitions for the Moo programming language
-Copyright   : (c) JJoaoll, 2025
+Copyright   : (c) 2025 Moo Language Team
 License     : MIT
 Maintainer  : joaoduos@gmail.com
 Stability   : experimental
