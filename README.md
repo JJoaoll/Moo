@@ -1,4 +1,4 @@
-# 🐄 Moo Programming Language
+# 🐄 The Moo Programming Language
 
 [![Haskell](https://img.shields.io/badge/Haskell-9.8.4-5e5086?style=flat&logo=haskell)](https://www.haskell.org/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
