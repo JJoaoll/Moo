@@ -69,6 +69,7 @@ executable Moo
         Analyser.Fun.FunContext.Def, Analyser.Fun.FunContext.Utils,
         Analyser.Fun.Sttm, Analyser.Fun.Pattern, Analyser.Fun.FunDef, Analyser.Program,
         Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
+        Interpreter.InterpretT, Interpreter.Expr, 
         Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
 
     -- LANGUAGE extensions used by modules in this package.
@@ -82,6 +83,9 @@ executable Moo
                     , parser-combinators
                     , text
                     , lens
+                    -- performance:
+                    -- , unordered-containers
+                    -- , hashable
 
     -- Directories containing source files.
     hs-source-dirs:   src
