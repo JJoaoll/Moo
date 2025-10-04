@@ -33,8 +33,8 @@ $(makeLenses ''DVar)
 data Context = Context
   { _cTypes :: [TypeDef]
   , _cFuncs :: [FunDef]
-  , _cGlobs :: [FunDef]
-  , _cCnsts :: [FunDef] -- the dream is remove it
+  , _cGlobs :: [DVar]   -- it needs to be preprocessed!!!!!
+  , _cCnsts :: [DVar]   -- the dream is remove it
   , _cStack :: [[DVar]] -- positions represents the scope level.
   , _cScope :: Int
   } deriving (Eq, Show)

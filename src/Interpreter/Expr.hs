@@ -23,14 +23,20 @@ evalExpr (ELit lit) =
       VData name <$>
         forM (fmap ELit lits) evalExpr 
 
-evalExpr (EConstr name args) = undefined
+evalExpr (EConstr name args) = 
+  VData name <$> forM args evalExpr
 
 evalExpr (EVar name) = do
   ctx <- get
   liftEither $ runExcept (ctx `findVarVal` name)
 
 evalExpr (EConst name) = undefined
-evalExpr (EGlobal name) = undefined
+evalExpr (EGlobal name) = do
+  ctx <- get
+  case ctx `findGlobal` name of
+    Nothing -> undefined
+    Just val -> pure val
+
 evalExpr (EUnOp op ex) = undefined
 evalExpr (EBinOp exL op exR) = undefined
 evalExpr (EFunCall fun arg) = undefined
@@ -48,3 +54,10 @@ ctx `findVarVal` name =
           | ctx ^. cScope == 0 -> undefined 
           | otherwise -> 
               (ctx & cScope %~ subtract 1) `findVarVal` name
+
+
+findGlobal :: Context -> Name -> Maybe Value
+ctx `findGlobal` name =
+  ctx ^. cGlobs  
+  & find ((name==) . (^. vName))
+  & fmap (^. vVal)
