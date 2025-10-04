@@ -1,5 +1,7 @@
 module Interpreter.InterpretT where
 
+import Interpreter.Context
+
 import Control.Monad.State
 import Control.Monad.Except
 
@@ -10,23 +12,6 @@ data InterpretError
   | IError2
   deriving (Eq, Show)
 
-data Context = Ctx
-  -- { typeTable :: [TypeDef]
-  -- , stack     :: [Decl]
-
-
-  -- }
-
-data Value 
-  = VInt    Int
-  | VChar   Char
-  | VFloat  Float
-  -- some day..
-  -- | VString String
-  -- | VOption (Maybe Value)
-  -- | VList   [Value] -- not garantee that they'll have the same type by types :c
-  | VData Name [Value] -- Lisp
-  deriving (Eq, Show)
 
 -- IORef when?
 type InterpretT = StateT Context (ExceptT InterpretError IO)
