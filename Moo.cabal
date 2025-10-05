@@ -69,7 +69,8 @@ executable Moo
         Analyser.Fun.FunContext.Def, Analyser.Fun.FunContext.Utils,
         Analyser.Fun.Sttm, Analyser.Fun.Pattern, Analyser.Fun.FunDef, Analyser.Program,
         Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
-        Interpreter.InterpretT, Interpreter.Expr, Interpreter.Context,
+        Interpreter.InterpretT, Interpreter.Expr, Interpreter.Context, Interpreter.Core,
+        Interpreter.Sttm,
         Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
 
     -- LANGUAGE extensions used by modules in this package.

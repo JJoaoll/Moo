@@ -99,8 +99,8 @@ data Sttm
   | SWhile Expr Sttms         -- ^ While loop: condition, body statements
   | SFor Name Expr Sttms      -- ^ For loop: variable, iterable, body statements
   | SReturn Expr              -- ^ Return statement with value
+  -- TODO: SMODIFY for GLOBALSSSSS!!!!
   deriving (Eq, Show)
-
 
 -- | Pattern data type for destructuring values in pattern matching.
 --

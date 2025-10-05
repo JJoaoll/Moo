@@ -7,6 +7,7 @@ import Control.Monad.Except
 
 import Utils
 
+-- only Error instead?
 data InterpretError 
   = IError String 
   | IError2
