@@ -6,6 +6,7 @@ import Interpreter.Context
 import Interpreter.Expr
 
 import Control.Monad.State
+import Control.Monad.Except
 import Control.Monad
 import qualified System.IO as IO
 
@@ -37,12 +38,35 @@ evalSttm (SPrint expr) = do
   liftIO $ IO.print val
   pure Nothing
 
--- Option! Literal?
+-- Option! Literal? -- I NEED a parser here
 evalSttm (SScan typε) = undefined
 
 evalSttm (SFunCall name args) = undefined
 evalSttm (SMatch strutinee cases) = undefined
-evalSttm (SWhile cond body) = undefined
+
+evalSttm (SWhile cond body) = do
+  whileLoop
+    where 
+      whileLoop = do
+        bool <- evalExpr cond 
+        case bool of
+          VFalse -> pure Nothing
+          VTrue -> do 
+            enterBlock
+            result <- execBody body
+            quitBlock
+            case result of
+              Nothing -> whileLoop  -- loop
+              Just val -> pure (Just val)  -- break the loop
+          _ -> throwError IError2
+    
+      execBody [] = pure Nothing
+      execBody (stmt:stmts) = do
+        mVal <- evalSttm stmt
+        case mVal of
+          Nothing -> execBody stmts   -- keep the loop
+          Just val -> pure (Just val) -- the loop and returns
+
 evalSttm (SFor i is body) = undefined
 
 evalSttm (SReturn expr) = do
