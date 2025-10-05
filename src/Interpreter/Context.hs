@@ -12,6 +12,7 @@ import qualified Data.List as L
 
 import Data.Text
 import Utils
+-- import Interpreter.InterpretT (InterpretT)
 
 -- modularize Values!
 data Value 
@@ -97,15 +98,15 @@ ctx `modifyDVarVal` (name, val) =
           in Right $ ctx & cStack .~ (before ++ [updatedScope] ++ after)
         _ -> Left "invalid scope structure"
 
-enterBlock :: Context -> Context
-enterBlock ctx = 
+blockItUp :: Context -> Context
+blockItUp ctx = 
     ctx  
     & cStack %~ (++ [[]])
     & cScope %~ (+1)
 
-quitBlock :: Context -> Maybe Context
-quitBlock (Context _ _ _ _ 0) = Nothing
-quitBlock ctx = 
+blockItDown :: Context -> Maybe Context
+blockItDown (Context _ _ _ _ 0) = Nothing
+blockItDown ctx = 
   case ctx ^. cStack of
     [] -> Nothing
     stack -> Just $ 
