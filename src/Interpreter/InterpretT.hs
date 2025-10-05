@@ -17,6 +17,20 @@ data InterpretError
 -- IORef when?
 type InterpretT = StateT Context (ExceptT InterpretError IO)
 
+enterBlock :: InterpretT ()
+enterBlock = modify blockItUp
+
+quitBlock :: InterpretT ()
+quitBlock = do 
+  ctx <- get
+  case blockItDown ctx of
+    Nothing -> throwError IError2
+    Just ctx' -> put ctx'
+
+
+
+  
+
 
 -- AI sugestion
 -- Implementação com IORef para performance e sharing
