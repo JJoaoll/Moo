@@ -65,15 +65,15 @@ executable miti
     other-modules: 
         Utils,
         Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
-        Parser.Expr, Parser.Sttm,
-        Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
+        Interpreter.InterpretT, Interpreter.Expr, 
+        Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic, Parser.Type
 
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
 
     -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.19.2.0
+    build-depends:    base ^>=4.19.1.0
                     , containers
                     , megaparsec
                     , mtl
