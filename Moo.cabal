@@ -63,7 +63,7 @@ executable Moo
 
     -- Modules included in this executable, other than Main.
     other-modules: 
-        Utils, Parser.Type,
+        Utils, Parser.Type, Parser.Expr,
         Analyser.Context.Def, Analyser.Context.Utils, Analyser.Context.Expr,
         Analyser.Fun.Expr, Analyser.TypeDef, Analyser.Error,
         Analyser.Fun.FunContext.Def, Analyser.Fun.FunContext.Utils,
