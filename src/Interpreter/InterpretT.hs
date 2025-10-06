@@ -27,11 +27,6 @@ quitBlock = do
     Nothing -> throwError IError2
     Just ctx' -> put ctx'
 
-
-
-  
-
-
 -- AI sugestion
 -- Implementação com IORef para performance e sharing
 -- data Value 

@@ -4,6 +4,8 @@
 
 module Interpreter.Context where
 
+import Grammar.Expr
+import Grammar.Sttm
 import Grammar.Type
 import Grammar.Program
 
@@ -15,7 +17,7 @@ import Utils
 -- import Interpreter.InterpretT (InterpretT)
 
 -- modularize Values!
-data Value 
+data Value
   = VInt    Int
   | VChar   Char
   | VFloat  Float
@@ -42,13 +44,13 @@ mooCat VNil ys = ys
 mooCat (VCons x xs) ys = VCons x (mooCat xs ys)
 mooCat xs ys
   = error $ "tried to concatenate things"
-  ++ " that were not lists, but: " ++ show xs 
+  ++ " that were not lists, but: " ++ show xs
   ++ " and " ++ show ys
 
 -- i wanna be a true list 😭
 listoquio :: Value -> [Value]
 listoquio VNil = []
-listoquio (VCons x xs) = 
+listoquio (VCons x xs) =
   x:listoquio xs
 listoquio weird = error "write me"
 
@@ -74,14 +76,14 @@ $(makeLenses ''Context)
 
 withDVar :: Context -> (Name, Value) -> Either Text Context
 ctx `withDVar` (name, val) =
-  let 
+  let
     stack = ctx ^. cStack
     newDecl = DVar name val
     ctxLevel = ctx ^. cScope
-  in 
+  in
     case stack L.!? ctxLevel of
       Nothing -> Left "invalid scope level"
-      Just currentScope 
+      Just currentScope
         | L.any ((name==) . (^. vName)) currentScope ->
             Left "already Exists"
         | otherwise ->
@@ -93,13 +95,13 @@ ctx `withDVar` (name, val) =
 
 modifyDVarVal :: Context -> (Name, Value) -> Either Text Context
 ctx `modifyDVarVal` (name, val) =
-  let 
+  let
     stack = ctx ^. cStack
     mCtxLevel = firstOcurrenceOf name (ctx ^. cScope) stack
   -- because of the analysis, the variable is avaiable somewhere!
   in case mCtxLevel of
     Nothing -> Left "problem with scope counting catched by \"modifyDVarVal\""
-    Just ctxLevel -> 
+    Just ctxLevel ->
       case L.splitAt ctxLevel stack of
         (before, current:after) ->
           let updatedScope = (name, val) `replaceIn` current
@@ -107,17 +109,17 @@ ctx `modifyDVarVal` (name, val) =
         _ -> Left "invalid scope structure"
 
 blockItUp :: Context -> Context
-blockItUp ctx = 
-    ctx  
+blockItUp ctx =
+    ctx
     & cStack %~ (++ [[]])
     & cScope %~ (+1)
 
 blockItDown :: Context -> Maybe Context
 blockItDown (Context _ _ _ _ 0) = Nothing
-blockItDown ctx = 
+blockItDown ctx =
   case ctx ^. cStack of
     [] -> Nothing
-    stack -> Just $ 
+    stack -> Just $
       ctx & cStack .~ L.init stack
           & cScope %~ subtract 1
 
@@ -127,7 +129,7 @@ firstOcurrenceOf _ currentScope _ | currentScope < 0 = Nothing -- base
 firstOcurrenceOf name currentScope dss =
   case dss L.!? currentScope of
     Nothing -> Nothing -- invalid Scope! 🤡
-    Just ds 
+    Just ds
       | L.any ((name ==) . (^. vName)) ds -> Just currentScope  -- found!
       | otherwise -> firstOcurrenceOf name (currentScope-1) dss -- one less..
 
@@ -138,3 +140,27 @@ _ `replaceIn` [] = []
   | d ^. vName == name = (d & vVal .~ val) : ds
   | otherwise = d : ((name, val) `replaceIn` ds)
 
+
+matches :: Value -> Pattern -> Bool
+val `matches` (PLit lit) =
+  case lit of
+    LInt n -> val == VInt n
+    LChar c -> val == VChar c
+    LFloat x -> val == VFloat x
+    LConstr cName cLits ->
+      case val of
+        VData vName vArgs ->
+          cName == vName
+          && L.length cLits == L.length vArgs
+          && and (L.zipWith matches vArgs $ PLit <$> cLits)
+
+        _ -> False
+
+val `matches` PConstructor cName cPatterns =
+  case val of
+    VData vName vArgs ->
+      cName == vName
+      && L.length cPatterns == L.length vArgs
+      && and (L.zipWith matches vArgs cPatterns)
+    _ -> False
+val `matches` _ = True

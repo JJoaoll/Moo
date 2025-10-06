@@ -7,7 +7,6 @@ import Interpreter.Expr
 
 import Control.Monad.State
 import Control.Monad.Except
-import Control.Monad
 import qualified System.IO as IO
 
 import Utils
@@ -46,8 +45,24 @@ evalSttm (SPrint expr) = do
 evalSttm (SScan typε) = undefined
 
 evalSttm (SFunCall name args) = undefined
-evalSttm (SMatch strutinee cases) = undefined
 
+evalSttm (SMatch scrutinee cases) = do
+  val <- evalExpr scrutinee
+  val `execFirstMatchIn` cases
+
+  where 
+    _ `execFirstMatchIn` [] = pure Nothing
+    val `execFirstMatchIn` ((pattern,body):anotherCases) = do
+      enterBlock
+      didMatch <- bindPatterns [val] [pattern]
+      if not didMatch then do
+        quitBlock
+        val `execFirstMatchIn` anotherCases
+      else do
+        result <- execBody body
+        quitBlock
+        pure result
+    
 evalSttm (SWhile cond body) = do
   whileLoop
     where 
@@ -63,13 +78,6 @@ evalSttm (SWhile cond body) = do
               Nothing -> whileLoop  -- loop
               Just val -> pure (Just val)  -- break the loop
           _ -> throwError IError2
-    
-      execBody [] = pure Nothing
-      execBody (stmt:stmts) = do
-        mVal <- evalSttm stmt
-        case mVal of
-          Nothing -> execBody stmts   -- keep the loop
-          Just val -> pure (Just val) -- breaks the loop and returns
 
 evalSttm (SFor i is body) = do
 
@@ -88,13 +96,6 @@ evalSttm (SFor i is body) = do
           Nothing -> forLoop vals           -- keeps the loop
           Just retVal -> pure $ Just retVal -- breaks the loop and returns
 
-      execBody [] = pure Nothing
-      execBody (stmt:stmts) = do
-        mVal <- evalSttm stmt
-        case mVal of
-          Nothing -> execBody stmts   -- keep the loop
-          Just val -> pure (Just val) -- breaks the loop and returns
-
 
 evalSttm (SReturn expr) = do
   val <- evalExpr expr
@@ -110,3 +111,37 @@ addDecl d@(_name, _val) = do
   case ctx `withDVar` d of 
     Right ctx' -> put ctx'
     Left msg -> error $ show msg -- TODO: do this msg
+
+
+execBody :: [Sttm] -> InterpretT (Maybe Value)
+execBody [] = pure Nothing
+execBody (stmt:stmts) = do
+  mVal <- evalSttm stmt
+  case mVal of
+    Nothing -> execBody stmts   -- keep the loop
+    Just val -> pure (Just val) -- breaks the loop and returns
+
+-- also check?? 
+-- ensure that they have the same size!
+bindPatterns :: [Value] -> [Pattern] -> InterpretT Bool
+bindPatterns [] [] = pure True
+bindPatterns (v:vs) (p:ps) = 
+  case p of
+    PConstructor cName cPatterns -> 
+      case v of
+        VData vName vArgs 
+          | length vArgs /= length cPatterns -> pure False
+          | vName /= cName -> pure False
+          | otherwise -> do
+            innerOk <- bindPatterns vArgs cPatterns
+            if innerOk then bindPatterns vs ps else pure False
+        _ -> pure False
+
+    PVar name -> do
+      addDecl (name, v)
+      bindPatterns vs ps
+    
+    _ -> bindPatterns vs ps
+
+bindPatterns _ _ = pure False
+
