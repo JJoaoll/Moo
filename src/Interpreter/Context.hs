@@ -45,10 +45,17 @@ mooCat xs ys
   ++ " that were not lists, but: " ++ show xs 
   ++ " and " ++ show ys
 
+-- i wanna be a true list 😭
+listoquio :: Value -> [Value]
+listoquio VNil = []
+listoquio (VCons x xs) = 
+  x:listoquio xs
+listoquio weird = error "write me"
+
 -- declarated Var
 data DVar = DVar
   { _vName :: Text
-  , _vType :: Type
+  -- , _vType :: Type
   , _vVal  :: Value
   } deriving (Eq, Show)
 
@@ -64,11 +71,12 @@ data Context = Context
 
 $(makeLenses ''Context)
 
-withDVar :: Context -> (Name, Type, Value) -> Either Text Context
-ctx `withDVar` (name, typε, val) =
+
+withDVar :: Context -> (Name, Value) -> Either Text Context
+ctx `withDVar` (name, val) =
   let 
     stack = ctx ^. cStack
-    newDecl = DVar name typε val
+    newDecl = DVar name val
     ctxLevel = ctx ^. cScope
   in 
     case stack L.!? ctxLevel of
