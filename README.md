@@ -333,7 +333,7 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 ## 👨‍💻 Author
 
-**João Duarte**  
+**João Pereira**  
 📧 [joaoduos@gmail.com](mailto:joaoduos@gmail.com)  
 🐙 [@JJoaoll](https://github.com/JJoaoll)
 
