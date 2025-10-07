@@ -164,3 +164,8 @@ val `matches` PConstructor cName cPatterns =
       && and (L.zipWith matches vArgs cPatterns)
     _ -> False
 val `matches` _ = True
+
+
+findTypeDef :: Context -> Name -> Maybe TypeDef
+findTypeDef ctx name 
+  = L.find ((name==) . tName) (ctx ^. cTypes)
