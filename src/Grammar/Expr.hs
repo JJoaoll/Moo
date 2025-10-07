@@ -37,6 +37,7 @@ factorial = EFunCall "fib" [ELit (LInt 5)]
 module Grammar.Expr where
 
 import Utils
+import Grammar.Type (Type)
 
 -- import Data.List.NonEmpty
 
@@ -107,6 +108,7 @@ data Expr
   | EUnOp UnOp Expr            -- ^ Unary operation
   | EBinOp Expr BinOp Expr     -- ^ Binary operation
   | EFunCall Name [Expr]       -- ^ Function call with arguments
+  | EScan Type                 -- ^ Scan input of given type
   deriving (Eq, Show)
 
 {-|
