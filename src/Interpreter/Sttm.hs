@@ -10,6 +10,10 @@ import Control.Monad.Except
 import qualified System.IO as IO
 
 import Utils
+import Data.Text hiding (length)
+import Grammar.Expr (Lit)
+import Text.Megaparsec (runParser)
+import Parser.Expr (literal)
 
 -- i'll consider that returns provides values
 evalSttm :: Sttm -> InterpretT (Maybe Value)
@@ -43,6 +47,20 @@ evalSttm (SPrint expr) = do
 
 -- Option! Literal? -- I NEED a parser here
 evalSttm (SScan typε) = undefined
+--   ctx <- get
+--   tDef <- ctx `findTypeDef` typε 
+--   input <- liftIO IO.getLine
+
+  
+  
+--   where
+--   parseLiteral :: Text -> Maybe Lit
+--   parseLiteral input =
+--    case runParser literal "" input of
+--     Right lit -> Just lit
+--     Left _ -> Nothing
+
+
 
 evalSttm (SFunCall name args) = undefined
 
