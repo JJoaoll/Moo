@@ -76,6 +76,7 @@ import Analyser.Fun.FunContext.Utils
 
 import Control.Monad
 import Control.Lens hiding (Context)
+import Grammar.Program (GlobalDef(..))
 
 -- | Check a statement and return updated function context.
 --
@@ -119,9 +120,13 @@ ctx `checkSttm` (SPrint expr) = do
   void $ ctx `checkExpr` expr
   pure ctx
 
-ctx `checkSttm` (SScan typε) = do
-  ctx `checkType` typε
-  pure ctx
+ctx `checkSttm` (SGtrib name expr) = do
+  exprType <- ctx `checkExpr` expr
+  case ctx `findGlobalDef` name of
+    Nothing -> Left Error
+    Just Global{gType} 
+      | gType == exprType -> pure ctx
+      | otherwise -> Left Error
   
 ctx `checkSttm` (SFunCall fName fArgs) = do
   case ctx `findFunDef` fName of
