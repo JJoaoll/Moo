@@ -1,6 +1,7 @@
 {-# LANGUAGE TemplateHaskell #-}
 {-# Language PatternSynonyms #-}
 {-# LANGUAGE OverloadedStrings #-}
+{-# LANGUAGE RecordWildCards #-}
 
 module Interpreter.Context where
 
@@ -9,7 +10,7 @@ import Grammar.Sttm
 import Grammar.Type
 import Grammar.Program
 
-import Control.Lens hiding (Context)
+import Control.Lens hiding (Context, has)
 import qualified Data.List as L
 
 import Data.Text
@@ -93,6 +94,21 @@ ctx `withDVar` (name, val) =
               in Right $ ctx & cStack .~ (before ++ [updatedScope] ++ after)
             _ -> Left "invalid scope structure"
 
+modifyGlobalVal :: Context -> (Name, Value) -> Either Text Context
+ctx `modifyGlobalVal` (name, val) = 
+  case L.find ((name ==) . (^. vName)) (ctx ^. cGlobs) of
+    Nothing -> Left "global variable not found"
+    Just _ -> 
+      Right $ ctx & cGlobs %~ _replace (name, val)
+
+      where 
+        _replace _ [] = []
+        _replace (name, val) (g:gs) 
+          | name /= (g ^. vName) = g:_replace (name, val) gs
+          | otherwise = (g & vVal .~ val):gs
+          
+
+
 modifyDVarVal :: Context -> (Name, Value) -> Either Text Context
 ctx `modifyDVarVal` (name, val) =
   let
@@ -169,3 +185,39 @@ val `matches` _ = True
 findTypeDef :: Context -> Name -> Maybe TypeDef
 findTypeDef ctx name 
   = L.find ((name==) . tName) (ctx ^. cTypes)
+
+
+  -- = LInt   Int    -- ^ Integer literal (e.g., @42@, @-17@)
+  -- | LChar  Char   -- ^ Character literal (e.g., @'a'@, @'\\n'@)
+  -- | LFloat Float  -- ^ Float literal (e.g., @3.14@, @-2.5@)
+  -- | LConstr Name [Lit]  -- ^ Constructor with arguments (e.g., @"Just" [LInt 5]@)
+
+lit2Val :: Lit -> Value
+lit2Val (LInt n) = VInt n
+lit2Val (LChar c) = VChar c
+lit2Val (LFloat x) = VFloat x
+lit2Val (LConstr cName cArgs) = 
+  VData cName (lit2Val <$> cArgs)
+
+checkLitType :: Context -> Lit -> Maybe Type
+ctx `checkLitType` lit = 
+  case lit of
+    LInt _ -> Just TInt
+    LChar _ -> Just TChar
+    LFloat _ -> Just TFloat
+    LConstr cName cArgs -> do
+      (_, TypeDef{tName}) <- ctx `findConstrAndTypeDefsByName` cName
+      argTypes <- mapM (ctx `checkLitType`) cArgs
+
+      pure $ TData tName argTypes
+
+
+findConstrAndTypeDefsByName :: Context -> Name -> Maybe (ConstrDef, TypeDef)
+findConstrAndTypeDefsByName ctx constrName = do
+
+  typeDef  <- L.find (has constrName . tConstrs) (ctx ^. cTypes)
+  cnstrDef <- L.find ((==constrName) . cName) (tConstrs typeDef)
+  pure (cnstrDef, typeDef)
+
+  where 
+    has name = L.any ((== name) . cName) 
