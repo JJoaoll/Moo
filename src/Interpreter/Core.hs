@@ -1,5 +1,6 @@
 -- Interpreter.Core
 {-# LANGUAGE RecordWildCards #-}
+{-# OPTIONS_GHC -Wno-name-shadowing #-}
 module Interpreter.Core where
 
 import Grammar.Expr

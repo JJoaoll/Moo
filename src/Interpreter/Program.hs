@@ -1,7 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
-{-# LANGUAGE RecordWildCards #-}
 module Interpreter.Program where
-import Interpreter.InterpretT (InterpretT, InterpretError)
+import Interpreter.InterpretT (InterpretT)
 -- import Grammar.Program
 import Interpreter.Context
 import Control.Monad.State
