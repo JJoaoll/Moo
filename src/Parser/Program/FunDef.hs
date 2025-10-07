@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use <$>" #-}
 
 module Parser.Program.FunDef where
 
@@ -16,16 +18,18 @@ funDef :: Parser FunDef
 funDef = do
   _ <- keyword "fun"
   name <- lexeme camelCase
+
   _ <- symbol "("
   params <- param `sepBy` symbol ","
   _ <- symbol ")"
+
   _ <- symbol "->"
   returnType <- Type.typε
+
   _ <- keyword "do"
   body <- Sttm.sttms
-  _ <- keyword "end"
-  _ <- symbol "-"
-  _ <- lexeme camelCase  -- function name again (for readability)
+
+  _ <- keyword $ "end-" `mappend` name
   pure $ FunDef name params returnType body
 
 -- | Parse function parameter: x: Int
@@ -34,4 +38,5 @@ param = do
   name <- lexeme snakeCase
   _ <- symbol ":"
   typε <- Type.typε
+
   pure $ Param name typε

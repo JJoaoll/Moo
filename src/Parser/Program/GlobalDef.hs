@@ -1,4 +1,6 @@
 {-# LANGUAGE OverloadedStrings #-}
+{-# OPTIONS_GHC -Wno-unrecognised-pragmas #-}
+{-# HLINT ignore "Use <$>" #-}
 
 module Parser.Program.GlobalDef where
 
@@ -12,10 +14,13 @@ import qualified Parser.Expr.Lit as Lit
 -- | Parse global variable definition: @global abelha: Int := 42
 globalDef :: Parser GlobalDef
 globalDef = do
-  _ <- symbol "@global"
+  _ <- keyword "@global"
   name <- lexeme snakeCase
+
   _ <- symbol ":"
   typε <- Type.typε
+
   _ <- symbol ":="
   value <- Lit.literal
+
   pure $ Global name typε value
