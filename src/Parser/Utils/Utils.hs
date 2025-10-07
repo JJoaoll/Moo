@@ -34,3 +34,7 @@ charLiteral = between (char '\'') (char '\'') L.charLiteral
 
 parens :: Parser α -> Parser α
 parens = between (symbol "(") (symbol ")")
+
+-- | Parse a keyword (reserved word) ensuring it's not followed by alphanumeric characters
+keyword :: Text -> Parser Text
+keyword kw = lexeme (string kw <* notFollowedBy alphaNumChar)
