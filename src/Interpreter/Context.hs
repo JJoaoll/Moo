@@ -186,6 +186,10 @@ findTypeDef :: Context -> Name -> Maybe TypeDef
 findTypeDef ctx name 
   = L.find ((name==) . tName) (ctx ^. cTypes)
 
+findFunDef :: Context -> Name -> Maybe FunDef
+findFunDef ctx name = 
+  L.find ((name==) . fName) (ctx ^. cFuncs)
+
 
   -- = LInt   Int    -- ^ Integer literal (e.g., @42@, @-17@)
   -- | LChar  Char   -- ^ Character literal (e.g., @'a'@, @'\\n'@)
