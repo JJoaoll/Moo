@@ -114,7 +114,7 @@ checkProgram Program{..} = do
 -- TODO: separate them
 checkGlobal :: Context -> GlobalDef -> Either Error ()
 ctx `checkGlobal` Global{..} = do
-  exprType <- ctx `checkExpr` gExpr 
+  exprType <- ctx `checkExpr` ELit gExpr
   ctx `checkType` gType 
   unless (gType == exprType) $ Left Error
 
@@ -130,12 +130,9 @@ ctx `checkGlobal` Global{..} = do
 -- @
 -- only literal constants?
 checkConst :: Context -> ConstDef -> Either Error ()
-ctx `checkConst` Const{..} =
-  case kVal of
-    ELit _ -> do
-      kType' <- ctx `checkExpr` kVal
-      unless (kType' == kType) (Left Error)
+ctx `checkConst` Const{..} = do
+    kType' <- ctx `checkExpr` ELit kVal
+    unless (kType' == kType) (Left Error)
 
-    _ -> Left Error
 
   

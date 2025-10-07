@@ -68,7 +68,7 @@ data Program = Program
 data GlobalDef = Global 
   { gName :: Name  -- ^ Variable name
   , gType :: Type  -- ^ Variable type
-  , gExpr :: Expr  -- ^ Initialization expression
+  , gExpr :: Lit   -- ^ Initialization expression
   } deriving (Eq, Show)
 
 -- <const> flag := "-hfsh--trace-show special"
@@ -84,7 +84,7 @@ data GlobalDef = Global
 data ConstDef = Const 
   { kName :: Name  -- ^ Constant name
   , kType :: Type  -- ^ Constant type
-  , kVal  :: Expr  -- ^ Constant value -- SHOULD BE A LITERAL
+  , kVal  :: Lit   -- ^ Constant value
   } deriving (Eq, Show)
 
 -- | Function parameter
