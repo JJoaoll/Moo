@@ -1,0 +1,18 @@
+# Haskell build artifacts
+/dist-newstyle/
+
+# Cabal sandbox (if used)
+/.cabal-sandbox/
+cabal.sandbox.config
+
+# Stack build
+/.stack-work/
+stack.yaml.lock
+
+# IDE directories
+/.vscode/
+/.idea/
+
+# OS files
+/.DS_Store
+Thumbs.db
