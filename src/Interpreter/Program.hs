@@ -1,8 +1,8 @@
 {-# LANGUAGE OverloadedStrings #-}
 {-# LANGUAGE RecordWildCards #-}
-module Interprer.Program where
+module Interpreter.Program where
 import Interpreter.InterpretT (InterpretT, InterpretError)
-import Grammar.Program
+-- import Grammar.Program
 import Interpreter.Context
 import Control.Monad.State
 import Interpreter.Core (evalFun)
