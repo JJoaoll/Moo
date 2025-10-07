@@ -92,8 +92,9 @@ type Sttms = [Sttm]
 data Sttm
   = SInit Name Type Expr      -- ^ Variable declaration: name, type, initial value
   | SAtrib Name Expr          -- ^ Variable assignment: name, new value  
+  | SGtrib Name Expr          -- ^ Global assignment: global, new value  
   | SPrint Expr               -- ^ Print expression to output
-  | SScan Type                -- ^ Scan input of given type
+  -- | SScan Type                -- ^ Scan input of given type
   | SFunCall Name [Expr]      -- ^ Function call: name, arguments
   | SMatch Expr [(Pattern, Sttms)]  -- ^ Pattern match: expression, cases
   | SWhile Expr Sttms         -- ^ While loop: condition, body statements
