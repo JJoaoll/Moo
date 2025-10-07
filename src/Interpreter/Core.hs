@@ -29,16 +29,24 @@ import Grammar.Program
 
 -----------------------------BEGIN-FUNC--------------------------------------
 
+refreshScope :: InterpretT ()
+refreshScope = do
+  ctx <- get
+  put $ ctx 
+    & cStack .~ [[]]
+    & cScope .~ 0
+
 evalFun :: [Value] -> FunDef -> InterpretT Value
 evalFun args FunDef{..} = do
-  enterBlock
+  oldCtx <- get
+  refreshScope
   args `app` fParams
 
   mRtrnVal <- execBody body
   case mRtrnVal of
     Nothing -> error $ "The function " ++ show fName ++ " didnt return a thing."
     Just val -> do 
-      quitBlock
+      put oldCtx
       pure val
 
 app :: [Value] -> [Param] -> InterpretT ()
