@@ -16,9 +16,9 @@ typε = lexeme $
 
 primitive :: Parser Type
 primitive = choice
-  [ string "Int"   >> return TInt
-  , string "Char"  >> return TChar
-  , string "Float" >> return TFloat
+  [ string "Int"   >> pure TInt
+  , string "Char"  >> pure TChar
+  , string "Float" >> pure TFloat
   ] 
 
 custom :: Parser Type
