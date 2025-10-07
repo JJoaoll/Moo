@@ -12,6 +12,12 @@ import Control.Monad.Except
 
 import Data.List ((!?), find)
 import Utils
+import Data.Text (Text)
+import qualified Data.Text.IO as IO
+-- import qualified System.IO as IO
+import Text.Megaparsec (runParser)
+import Parser.Expr (literal)
+import Grammar.Type (Type(..))
 
 -- assume everything is well typed!
 evalExpr :: Expr -> InterpretT Value
@@ -89,9 +95,34 @@ evalExpr (EBinOp exL op exR)
   | op `elem` badCompareBinOps = undefined
   | op `elem` bEqOps = undefined
 
+  | otherwise = undefined
+
 evalExpr (EFunCall fun arg) = undefined
 
-evalExpr _ = undefined
+-- u checked, right?
+evalExpr (EScan typε) = do
+  input <- liftIO IO.getLine
+  case parseLiteral input of
+    Nothing -> errorMsg
+    Just lit -> do
+      ctx <- get
+      case ctx `checkLitType` lit of
+        Nothing -> errorMsg
+        Just litType 
+          | litType /= typε -> errorMsg
+          | otherwise -> pure (lit2Val lit)
+
+  where
+    errorMsg = error $ "wrong input! Expecting something from type: " ++ show typε
+    parseLiteral :: Text -> Maybe Lit
+    parseLiteral input =
+      case runParser literal "" input of
+        Right lit -> Just lit
+        Left _    -> Nothing
+
+evalExpr (EConst cName) = error $ 
+  "Parsing internal problem: "
+  ++ "the const " ++ show cName ++ " didnt expand!"
 
 findVarVal :: Context -> Name -> Except InterpretError Value
 ctx `findVarVal` name = 
