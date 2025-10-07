@@ -45,22 +45,16 @@ evalSttm (SPrint expr) = do
   liftIO $ IO.print val
   pure Nothing
 
--- Option! Literal? -- I NEED a parser here
-evalSttm (SScan typε) = undefined
---   ctx <- get
---   tDef <- ctx `findTypeDef` typε 
---   input <- liftIO IO.getLine
 
-  
-  
---   where
---   parseLiteral :: Text -> Maybe Lit
---   parseLiteral input =
---    case runParser literal "" input of
---     Right lit -> Just lit
---     Left _ -> Nothing
+evalSttm (SGtrib name expr) = do -- undefined
+  val <- evalExpr expr
 
-
+  ctx <- get
+  case ctx `modifyGlobalVal` (name, val) of
+    Left msg -> error $ show msg -- TODO: treat this
+    Right ctx' -> do
+      put ctx'
+      pure Nothing
 
 evalSttm (SFunCall name args) = undefined
 
