@@ -18,11 +18,12 @@ import GHC.Float (int2Float)
 litInt, litChar, litFloat, litConstr :: Parser Lit
 
 literal :: Parser Lit
-literal = choice 
+literal = choice $ try <$>
   [ litFloat
   , litInt
   , litChar
   , litConstr
+  --, special -- builtin
   ] 
 
 litInt = lexeme $ fmap LInt $ 
@@ -44,8 +45,23 @@ litFloat = lexeme $ fmap LFloat $
      pure $ int2Float int
      
 
-litConstr = undefined
+litConstr = 
+  try simpleC <|>
+  complexC
 
+simpleC, complexC :: Parser Lit
+
+simpleC = LConstr <$> name <*> pure []
+complexC = do
+  cName <- name
+  _ <- symbol "("
+  cArgs <- literal `sepBy` symbol ","
+  _ <- symbol ")"
+
+  pure $ LConstr cName cArgs
+
+name :: Parser Text
+name = lexeme pascalCase
 
 {-
 
