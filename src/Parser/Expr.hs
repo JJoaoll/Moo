@@ -6,13 +6,13 @@ import Grammar.Expr
 
 import Text.Megaparsec 
 import Text.Megaparsec.Char
-import Grammar.Type
+-- import Grammar.Type
 import Data.Text 
 
 import qualified Text.Megaparsec.Char.Lexer as L
 import Parser.Utils.Utils 
 import Parser.Utils.Cases
-import Control.Monad (when)
+-- import Control.Monad (when)
 import GHC.Float (int2Float)
 
 litInt, litChar, litFloat, litConstr :: Parser Lit

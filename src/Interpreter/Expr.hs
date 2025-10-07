@@ -17,7 +17,6 @@ import qualified Data.Text.IO as IO
 -- import qualified System.IO as IO
 import Text.Megaparsec (runParser)
 import Parser.Expr (literal)
-import Grammar.Type (Type(..))
 
 -- assume everything is well typed!
 evalExpr :: Expr -> InterpretT Value
