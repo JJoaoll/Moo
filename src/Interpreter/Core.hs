@@ -18,7 +18,7 @@ import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 -- import qualified System.IO as IO
 import Text.Megaparsec (runParser)
-import Parser.Expr (literal)
+import Parser.Expr.Lit (literal)
 import Grammar.Sttm
 import qualified System.IO as IO
 import Grammar.Program

@@ -14,54 +14,91 @@ import Parser.Utils.Utils
 import Parser.Utils.Cases
 -- import Control.Monad (when)
 import GHC.Float (int2Float)
+import Parser.Utils.Cases (snakeCase)
 
-litInt, litChar, litFloat, litConstr :: Parser Lit
+import qualified Parser.Expr.Lit as Lit (literal)
+import qualified Parser.Type as Type 
+import Parser.Expr.Op
 
-literal :: Parser Lit
-literal = choice $ try <$>
-  [ litFloat
-  , litInt
-  , litChar
-  , litConstr
+expr :: Parser Expr
+expr = choice $ try <$>
+  [ literal      <?> "literal"
+  , constructor  <?> "constructor"
+  , funCall      <?> "fun call"
+  , variable     <?> "variable"
+  , constant     <?> "constant"
+  , global       <?> "global"
+  -- , operation
+  , scan         <?> "scan!"
   --, special -- builtin
   ] 
 
-litInt = lexeme $ fmap LInt $ 
-  try L.decimal <|> 
-  do _ <- char '-'
-     n <- L.decimal
-     pure (-n)
+literal, constructor, variable, constant, global, operation, funCall, scan :: Parser Expr
 
-litChar = lexeme $ do 
-  _ <- char '\''
-  c <- L.charLiteral
-  _ <- char '\''
-  pure (LChar c)
+literal = ELit <$> Lit.literal
 
-litFloat = lexeme $ fmap LFloat $
-  try L.float <|>
-  do (LInt int) <- litInt
-     _ <- char '.'
-     pure $ int2Float int
-     
+constructor = 
+  try complex <|> simple
 
-litConstr = 
-  try simpleC <|>
-  complexC
+variable = EVar <$> lexeme snakeCase 
 
-simpleC, complexC :: Parser Lit
+constant = do
+  _ <- symbol "<"
+  name <- lexeme snakeCase
+  _ <- symbol ">"
 
-simpleC = LConstr <$> name <*> pure []
-complexC = do
-  cName <- name
+  pure (EConst name)
+
+global = do
+  _ <- char '@'
+  name <- lexeme snakeCase
+  pure (EGlobal name)
+
+operation = undefined
+
+funCall = do
+  name <- fName
+
   _ <- symbol "("
-  cArgs <- literal `sepBy` symbol ","
+  args <- fArgs
   _ <- symbol ")"
 
-  pure $ LConstr cName cArgs
+  pure (EFunCall name args)
 
-name :: Parser Text
-name = lexeme pascalCase
+  where 
+    fArgs = 
+      expr `sepBy` symbol ","
+      <|> pure []
+
+scan = do 
+  -- keyword!
+  _ <- symbol "scan!"
+
+  _ <- symbol "("
+  typε <- Type.typε 
+  _ <- symbol ")"
+
+  pure (EScan typε)
+
+simple :: Parser Expr
+simple = EConstr <$> cName <*> pure []
+-- simple = do
+--   tName <- name
+--   pure $ TData tName []
+
+complex :: Parser Expr
+complex = do
+  name <- cName
+  _ <- symbol "("
+  args <- expr `sepBy` symbol ","
+  _ <- symbol ")"
+
+  pure $ EConstr name args
+
+cName, fName :: Parser Text
+cName = lexeme pascalCase
+fName = lexeme camelCase
+
 
 {-
 
