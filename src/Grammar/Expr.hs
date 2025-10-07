@@ -108,7 +108,7 @@ data Expr
   | EUnOp UnOp Expr            -- ^ Unary operation
   | EBinOp Expr BinOp Expr     -- ^ Binary operation
   | EFunCall Name [Expr]       -- ^ Function call with arguments
-  | EScan Type                 -- ^ Scan input of given type
+  | EScan Type                 -- ^ Unsafely scan an input of given type
   deriving (Eq, Show)
 
 {-|
