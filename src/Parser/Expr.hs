@@ -1,4 +1,50 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Parser.Expr where
+
+import Grammar.Expr
+
+import Text.Megaparsec 
+import Text.Megaparsec.Char
+import Grammar.Type
+import Data.Text 
+
+import qualified Text.Megaparsec.Char.Lexer as L
+import Parser.Utils.Utils 
+import Parser.Utils.Cases
+import Control.Monad (when)
+import GHC.Float (int2Float)
+
+litInt, litChar, litFloat, litConstr :: Parser Lit
+
+literal :: Parser Lit
+literal = choice 
+  [ litFloat
+  , litInt
+  , litChar
+  , litConstr
+  ] 
+
+litInt = lexeme $ fmap LInt $ 
+  try L.decimal <|> 
+  do _ <- char '-'
+     n <- L.decimal
+     pure (-n)
+
+litChar = lexeme $ do 
+  _ <- char '\''
+  c <- L.charLiteral
+  _ <- char '\''
+  pure (LChar c)
+
+litFloat = lexeme $ fmap LFloat $
+  try L.float <|>
+  do (LInt int) <- litInt
+     _ <- char '.'
+     pure $ int2Float int
+     
+
+litConstr = undefined
 
 
 {-
