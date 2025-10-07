@@ -192,6 +192,18 @@ checkExpr ctx (EFunCall fName args) =
       forM_ args (ctx `checkExpr`)
       handleFun ctx f args
 
+checkExpr ctx (EScan typε) =
+  case typε of
+    TInt    -> pure TInt
+    TChar   -> pure TChar
+    TFloat  -> pure TFloat
+    (TData tName _) -> case ctx `findTypeDef` tName of
+                           Nothing -> Left Error
+                           Just _  -> pure typε
+    _ -> Left Error
+
+
+
 ---- Handlers ----
 
 handleFun :: FunContext -> FunDef -> [Expr] -> Either Error Type
