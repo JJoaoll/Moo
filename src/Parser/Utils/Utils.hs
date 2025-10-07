@@ -31,3 +31,6 @@ symbol = L.symbol sc
 
 charLiteral :: Parser Char 
 charLiteral = between (char '\'') (char '\'') L.charLiteral
+
+parens :: Parser α -> Parser α
+parens = between (symbol "(") (symbol ")")
