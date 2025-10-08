@@ -4,14 +4,22 @@ type Foo def
   Loo(Foo)
 end-def
 
+type Nat def
+  Zero
+  Succ(Nat)
+end-def
 
 fun main() -> Int do
-  let foo: Foo := Foo(3)
+  let x: Int := 3
+  let loo: Foo := Loo(Foo(x))
+  
+  // putting literals after Succ
+  let two0: Nat := Succ(Succ(Zero))
 
-  let loo: Foo := Loo(foo)
-
-
-  print(foo)
+  // using vars instead
+  // let zero: Nat := Zero
+  // let one:  Nat := Succ(zero)
+  // let two1: Nat := Succ(one)
 
   return 0
 end-main

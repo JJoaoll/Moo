@@ -28,9 +28,9 @@ expr = makeExprParser term operatorTable
 term :: Parser Expr
 term = choice $ try <$>
   [ parens expr         <?> "parenthesized expression"
-  , literal             <?> "literal"
   , constructor         <?> "constructor"
   , funCall             <?> "fun call"
+  , literal             <?> "literal" -- a empty constructor would always match
   , variable            <?> "variable"
   , constant            <?> "constant"
   , global              <?> "global"
@@ -59,18 +59,14 @@ global = do
   pure (EGlobal name)
 
 funCall = do
-  name <- fName
+  name <- fName                    <?> "fun name"
 
-  _ <- symbol "("
-  args <- fArgs
-  _ <- symbol ")"
+  _ <- symbol "("                  <?> "openning parens"
+  args <- expr `sepBy` symbol ","  <?> "fun args"
+  _ <- symbol ")"                  <?> "closing parens"
 
   pure (EFunCall name args)
 
-  where 
-    fArgs = 
-      expr `sepBy` symbol ","
-      <|> pure []
 
 scan = do 
   -- keyword!
@@ -92,8 +88,8 @@ complex :: Parser Expr
 complex = do
   name <- cName
   _ <- symbol "("
-  args <- expr `sepBy` symbol ","
-  _ <- symbol ")"
+  args <- expr `sepBy` symbol "," <?> "constructor args"
+  _ <- symbol ")"                 
 
   pure $ EConstr name args
 

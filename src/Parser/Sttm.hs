@@ -43,12 +43,13 @@ sttms = many sttm
 -- | Variable declaration: let x: Int := 42
 sInit :: Parser Sttm
 sInit = do
-  _ <- keyword "let"
-  name <- lexeme snakeCase
-  _ <- symbol ":"
-  typε <- Type.typε
-  _ <- symbol ":="
-  expr <- lexeme E.expr
+  _ <- keyword "let"       <?> "let"
+  name <- lexeme snakeCase <?> "var name"
+  _ <- symbol ":"          <?> "\":\""
+  typε <- Type.typε        <?> "type"
+  _ <- symbol ":="         <?> "\":=\""
+  expr <- lexeme E.expr    <?> "expr"
+
   pure $ SInit name typε expr
 
 -- | Variable assignment: x := expr
