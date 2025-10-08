@@ -29,12 +29,12 @@ term :: Parser Expr
 term = choice $ try <$>
   [ parens expr         <?> "parenthesized expression"
   , constructor         <?> "constructor"
+  , scan                <?> "scan!"   -- not think i'm a fun!
   , funCall             <?> "fun call"
   , literal             <?> "literal" -- a empty constructor would always match
   , variable            <?> "variable"
   , constant            <?> "constant"
   , global              <?> "global"
-  , scan                <?> "scan!"
   ] 
 
 literal, constructor, variable, constant, global, funCall, scan :: Parser Expr

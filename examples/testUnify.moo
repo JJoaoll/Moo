@@ -16,10 +16,13 @@ fun main() -> Int do
   // putting literals after Succ
   let two0: Nat := Succ(Succ(Zero))
 
-  // using vars instead
-  // let zero: Nat := Zero
-  // let one:  Nat := Succ(zero)
-  // let two1: Nat := Succ(one)
+  //using vars instead
+  let zero: Nat := Zero
+  let one:  Nat := Succ(zero)
+  let two1: Nat := Succ(one)
+
+  print(two0)
+  print(two1)
 
   return 0
 end-main
