@@ -88,6 +88,7 @@ evalSttm (SAtrib name expr) = do
       put ctx'
       pure Nothing
 
+-- TODO: Properly implement it!
 evalSttm (SPrint expr) = do
   val <- evalExpr expr
   liftIO $ IO.print val

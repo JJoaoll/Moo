@@ -62,17 +62,46 @@ executable Moo
     main-is:          Main.hs
 
     -- Modules included in this executable, other than Main.
-    other-modules: 
-        Utils, Parser.Type, Parser.Expr, Parser.Expr.Lit, Parser.Sttm, Parser.Program,
-        Parser.Program.ConstDef, Parser.Program.FunDef, Parser.Program.GlobalDef, Parser.Program.TypeDef,
-        Analyser.Context.Def, Analyser.Context.Utils, Analyser.Context.Expr,
-        Analyser.Fun.Expr, Analyser.TypeDef, Analyser.Error,
-        Analyser.Fun.FunContext.Def, Analyser.Fun.FunContext.Utils,
-        Analyser.Fun.Sttm, Analyser.Fun.Pattern, Analyser.Fun.FunDef, Analyser.Program,
-        Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
-        Interpreter.InterpretT, Interpreter.Context, Interpreter.Core,
-        Interpreter.Program,
-        Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
+    other-modules:
+        -- Core utilities
+        Utils
+        -- Grammar (AST definitions)
+        , Grammar.Expr
+        , Grammar.Program
+        , Grammar.Sttm
+        , Grammar.Type
+        -- Parser
+        , Parser.Expr
+        , Parser.Expr.Lit
+        , Parser.Program
+        , Parser.Program.ConstDef
+        , Parser.Program.FunDef
+        , Parser.Program.GlobalDef
+        , Parser.Program.TypeDef
+        , Parser.Samples.Basic
+        , Parser.Samples.Ids
+        , Parser.Sttm
+        , Parser.Type
+        , Parser.Utils.Cases
+        , Parser.Utils.Utils
+        -- Analyser (Type checker)
+        , Analyser.Context.Def
+        , Analyser.Context.Expr
+        , Analyser.Context.Utils
+        , Analyser.Error
+        , Analyser.Fun.Expr
+        , Analyser.Fun.FunContext.Def
+        , Analyser.Fun.FunContext.Utils
+        , Analyser.Fun.FunDef
+        , Analyser.Fun.Pattern
+        , Analyser.Fun.Sttm
+        , Analyser.Program
+        , Analyser.TypeDef
+        -- Interpreter
+        , Interpreter.Context
+        , Interpreter.Core
+        , Interpreter.InterpretT
+        , Interpreter.Program
 
     -- LANGUAGE extensions used by modules in this package.
     -- other-extensions:
