@@ -228,6 +228,8 @@ handleFun ctx FunDef{fName, fParams, rtrType} args
 -- tparams (fake ForAll)          appTs                                    cParams 
 -- [TVar a, TVar b] [BinTree(a, Float), Float, BinTree(a, Float)] [BinTree(a, b), a, BinTree(a, b)] --> [a, Float]
 
+-- [] [Int, Float] [Int, Float]
+
 unifyTParams :: [Type] -> [Type] -> [Type] -> Maybe [Type]
 unifyTParams tParams [] [] = Just tParams
 unifyTParams tParams (appT:appTs) (cParam:cParams) =
@@ -246,7 +248,11 @@ unifyTParams tParams (appT:appTs) (cParam:cParams) =
           tParamsAfterArgs <- unifyTParams tParams ts ts'
           unifyTParams tParamsAfterArgs appTs cParams
 
-    _ -> Nothing
+    -- primitive types..
+    (t, t') 
+      | t /= t' -> Nothing
+      | otherwise -> unifyTParams tParams appTs cParams
+
 
     where 
         replacing :: [Type] -> (Name, Type) -> [Type]

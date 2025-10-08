@@ -48,7 +48,7 @@ sInit = do
   _ <- symbol ":"
   typε <- Type.typε
   _ <- symbol ":="
-  expr <- E.expr
+  expr <- lexeme E.expr
   pure $ SInit name typε expr
 
 -- | Variable assignment: x := expr
@@ -56,7 +56,7 @@ sAtrib :: Parser Sttm
 sAtrib = do
   name <- lexeme snakeCase
   _ <- symbol ":="
-  expr <- E.expr
+  expr <- lexeme E.expr
   pure $ SAtrib name expr
 
 -- | Global assignment: @global := expr
@@ -65,7 +65,7 @@ sGtrib = do
   _ <- char '@'
   name <- lexeme snakeCase
   _ <- symbol ":="
-  expr <- E.expr
+  expr <- lexeme E.expr
   pure $ SGtrib name expr
 
 -- ============================================================
