@@ -73,7 +73,23 @@ data Type
   | TFloat              -- ^ Floating-point type
   | TVar Name           -- ^ Type variable -- .. Only in typedefs, please?
   | TData Name [Type]   -- ^ Parametric data type with arguments
-  deriving (Eq, Show)
+  deriving Show
+  -- deriving (Eq, Show)
+
+-- GAMBIARRA???
+instance Eq Type where
+  TVar x == TVar y = x == y
+  _ == TVar _ = True
+  TVar _ == _ = True
+
+  TData nameL tsL == TData nameR tsR 
+    = nameL == nameR && tsL == tsR
+
+  TInt == TInt     = True
+  TChar == TChar   = True
+  TFloat == TFloat = True
+
+  _ == _ = False
 
 -- | Built-in type patterns for common types
 pattern TEmpty, TOne, TBool :: Type

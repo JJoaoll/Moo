@@ -17,15 +17,28 @@ fun main() -> Int do
 
     let acress: Float := scan!(Float)
 
-    us := acressSals(us, acress)
+    us := accSals(us, acress)
     //let us_rec: List(User) := acressAllSalsRec(us, acress)
     
+    print (us)
 
     return 0
 end-main
 
 fun accSals(users: List(User), accress: Float) -> List(User) do
     let new_users: List(User) := Nil
+
+    for user in users do
+        match user with
+            case User(age, rent) do
+
+            end-case
+
+        end-match
+
+    end-for
+
+    return new_users
 
 end-accSals
 
