@@ -54,43 +54,110 @@ extra-doc-files:    CHANGELOG.md
 common warnings
     ghc-options: -Wall
 
-executable Moo
-    -- Import common warning flags.
+library
     import:           warnings
-
-    -- .hs or .lhs file containing the Main module.
-    main-is:          Main.hs
-
-    -- Modules included in this executable, other than Main.
-    other-modules: 
-        Utils, Parser.Type, Parser.Expr, Parser.Expr.Lit, Parser.Sttm, Parser.Program,
-        Parser.Program.ConstDef, Parser.Program.FunDef, Parser.Program.GlobalDef, Parser.Program.TypeDef,
-        Analyser.Context.Def, Analyser.Context.Utils, Analyser.Context.Expr,
-        Analyser.Fun.Expr, Analyser.TypeDef, Analyser.Error,
-        Analyser.Fun.FunContext.Def, Analyser.Fun.FunContext.Utils,
-        Analyser.Fun.Sttm, Analyser.Fun.Pattern, Analyser.Fun.FunDef, Analyser.Program,
-        Grammar.Expr, Grammar.Program, Grammar.Sttm, Grammar.Type,
-        Interpreter.InterpretT, Interpreter.Context, Interpreter.Core,
-        Interpreter.Program,
-        Parser.Utils.Utils, Parser.Samples.Ids, Parser.Utils.Cases, Parser.Samples.Basic
-
-    -- LANGUAGE extensions used by modules in this package.
-    -- other-extensions:
-
-    -- Other library packages from which modules are imported.
-    build-depends:    base ^>=4.19.1.0
-                    , containers
-                    , megaparsec
-                    , mtl
-                    , parser-combinators
-                    , text
-                    , lens
-                    -- performance:
-                    -- , unordered-containers
-                    -- , hashable
-
-    -- Directories containing source files.
+    exposed-modules:
+        -- Core utilities
+        Utils
+        -- Grammar (AST definitions)
+        , Grammar.Expr
+        , Grammar.Program
+        , Grammar.Sttm
+        , Grammar.Type
+        -- Parser
+        , Parser.Expr
+        , Parser.Expr.Lit
+        , Parser.Program
+        , Parser.Program.ConstDef
+        , Parser.Program.FunDef
+        , Parser.Program.GlobalDef
+        , Parser.Program.Import
+        , Parser.Program.TypeDef
+        , Parser.Samples.Basic
+        , Parser.Samples.Ids
+        , Parser.Sttm
+        , Parser.Type
+        , Parser.Utils.Cases
+        , Parser.Utils.Utils
+        -- Analyser (Type checker)
+        , Analyser.Context.Def
+        , Analyser.Context.Expr
+        , Analyser.Context.Utils
+        , Analyser.Error
+        , Analyser.Fun.Expr
+        , Analyser.Fun.FunContext.Def
+        , Analyser.Fun.FunContext.Utils
+        , Analyser.Fun.FunDef
+        , Analyser.Fun.Pattern
+        , Analyser.Fun.Sttm
+        , Analyser.Program
+        , Analyser.TypeDef
+        -- Interpreter
+        , Interpreter.Context
+        , Interpreter.Core
+        , Interpreter.InterpretT
+        , Interpreter.Program
+    build-depends:    
+        base ^>=4.19.1.0
+        , containers
+        , megaparsec
+        , mtl
+        , parser-combinators
+        , text
+        , lens
+        , directory
+        , filepath
     hs-source-dirs:   src
+    default-language: GHC2021
 
-    -- Base language which the package is written in.
+executable Moo
+    import:           warnings
+    main-is:          Main.hs
+    other-modules:
+        -- Imported by Main.hs but provided by library
+        Utils
+        Grammar.Expr
+        Grammar.Program
+        Grammar.Sttm
+        Grammar.Type
+        Interpreter.Context
+        Interpreter.Core
+        Interpreter.InterpretT
+        Interpreter.Program
+        Parser.Expr.Lit
+        Parser.Utils.Cases
+        Parser.Utils.Utils
+    build-depends:    
+        base ^>=4.19.1.0
+        , Moo
+        , containers
+        , megaparsec
+        , mtl
+        , parser-combinators
+        , text
+        , lens
+        , directory
+        , filepath
+    hs-source-dirs:   src
+    default-language: GHC2021
+
+test-suite Moo-test
+    import:           warnings
+    type:             exitcode-stdio-1.0
+    main-is:          Spec.hs
+    other-modules:
+        Parser.Program.ImportTest
+    build-depends:    
+        base ^>=4.19.1.0
+        , Moo
+        , hspec >= 2.0
+        , hspec-megaparsec
+        , hspec-discover
+        , megaparsec
+        , text
+        , directory
+        , filepath
+        , temporary
+    build-tool-depends: hspec-discover:hspec-discover
+    hs-source-dirs:   test
     default-language: GHC2021
