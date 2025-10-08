@@ -15,7 +15,10 @@ import qualified Parser.Program as PP
 import Text.Megaparsec (runParser, errorBundlePretty)
 import qualified Data.Text.IO as TIO
 import System.Environment (getArgs)
-import System.Exit (exitFailure) 
+import System.Exit (exitFailure)
+
+-- Analyser imports
+import qualified Analyser.Program as AP 
 
 -- AI GENERATED Example!
 
@@ -72,17 +75,27 @@ main = do
           putStrLn $ "  Constants: " ++ show (length $ pConsts program)
           putStrLn $ "  Functions: " ++ show (length $ pFuns program)
           
-          -- Initialize interpreter context
-          let ctx = initContext program
-          
-          -- Run the program
-          putStrLn "\nRunning program..."
-          result' <- runExceptT $ evalStateT evalProgram ctx
-          case result' of
+          -- Semantic analysis
+          putStrLn "\nAnalysing program..."
+          case AP.checkProgram program of
             Left err -> do
-              putStrLn "Runtime error:"
+              putStrLn "Analysis error:"
               print err
               exitFailure
-            Right val -> do
-              putStrLn "Program completed successfully!"
-              print val
+            Right () -> do
+              putStrLn "✓ Analysis successful!"
+              
+              -- Initialize interpreter context
+              let ctx = initContext program
+              
+              -- Run the program
+              putStrLn "\nRunning program..."
+              result' <- runExceptT $ evalStateT evalProgram ctx
+              case result' of
+                Left err -> do
+                  putStrLn "Runtime error:"
+                  print err
+                  exitFailure
+                Right val -> do
+                  putStrLn "Program completed successfully!"
+                  print val

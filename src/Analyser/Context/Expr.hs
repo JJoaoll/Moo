@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 {-|
 Module      : Analyser.Context.Expr
 Description : Expression type checking and inference for Moo language
@@ -90,47 +92,49 @@ ctx `checkExpr` (ELit lit) =
     LFloat _ -> pure TFloat
     LConstr name lits -> 
       case ctx `findConstrAndTypeDefsByName` name of
-        Nothing -> Left Error
+        Nothing -> Left $ ConstrNotFound name
         Just (ConstrDef{cParams}, TypeDef{tName, tParams})
-          | length cParams /= length lits -> Left Error
+          | length cParams /= length lits -> 
+              Left $ IncorrectArity name (length cParams) (length lits)
           | otherwise -> do
               tLits <- forM lits $ \lit' -> do
                 ctx `checkExpr` ELit lit'
 
               -- TODO: Lifing
               case unifyTParams (TVar <$> tParams) tLits cParams of
-                Nothing -> Left Error
+                Nothing -> Left TypeUnificationFailed
                 Just ts -> pure $ TData tName ts
             
 
 ctx `checkExpr` (EConstr name args) = 
   case ctx `findConstrAndTypeDefsByName` name of
-    Nothing -> Left Error
+    Nothing -> Left $ ConstrNotFound name
     Just (ConstrDef{cParams}, TypeDef{tName, tParams}) 
-      | length cParams /= length args -> Left Error
+      | length cParams /= length args -> 
+          Left $ IncorrectArity name (length cParams) (length args)
       | otherwise -> do
           tLits <- forM args $ \arg -> do
             ctx `checkExpr` arg
 
           -- TODO: Lifing
           case unifyTParams (TVar <$> tParams) tLits cParams of
-            Nothing -> Left Error
+            Nothing -> Left TypeUnificationFailed
             Just ts -> pure $ TData tName ts
 
 -- | Variables are not allowed in global context expressions.
 -- This should never occur in properly parsed programs.
 -- NO EVARS HERE! NO NEED TO CHECK!
-_ `checkExpr` (EVar _) = Left Error
+_ `checkExpr` (EVar name) = Left $ VarNotFound name
 
 ctx `checkExpr` (EConst name) = 
   case ctx `findConstDef` name of 
-    Nothing -> Left Error
+    Nothing -> Left $ ConstNotFound name
     Just (Const{kType}) ->       
       pure kType
 
 ctx `checkExpr` (EGlobal name) = 
   case ctx `findGlobalDef` name of 
-    Nothing -> Left Error
+    Nothing -> Left $ GlobalNotFound name
     Just (Global{gType}) ->       
       pure gType
 
@@ -139,7 +143,8 @@ checkExpr ctx (EUnOp op expr) = do
   case (op, t) of 
     (Neg, TInt)  -> pure TInt
     (Not, TBool) -> pure TBool
-    _ -> Left Error -- TODO: Msg
+    (Neg, actualType) -> Left $ TypeMismatch TInt actualType
+    (Not, actualType) -> Left $ TypeMismatch TBool actualType
 
 -- | Check binary operation type compatibility.
 -- 
@@ -168,7 +173,7 @@ checkExpr ctx (EBinOp lExpr op rExpr) = do
       | op `elem` boolBinOps -> pure TBool
     (TList a, TList b)
       | a == b && op `elem` listBinOps -> pure (TList a)
-    _ -> Left Error
+    _ -> Left $ TypeMismatch tL tR
       
 checkExpr ctx (EFunCall fName args) = 
   case ctx `findFunDef` fName of
@@ -176,6 +181,9 @@ checkExpr ctx (EFunCall fName args) =
     Just f  -> do
       forM_ args (ctx `checkExpr`)
       handleFun ctx f args
+
+checkExpr _ (EScan _) = 
+  Left $ VarNotFound "scan is not allowed in global context"
 
 
 ---- Handlers ----
@@ -201,10 +209,11 @@ handleFun ctx FunDef{fName, fParams, rtrType} args
 
   | otherwise = do
       ts <- forM args (ctx `checkExpr`) 
-      if ts == (pType <$> fParams) then
+      let expectedTypes = pType <$> fParams
+      if ts == expectedTypes then
         pure rtrType 
       else
-        Left Error -- TODO: Improve this Error!
+        Left $ TypeMismatch (TData "FunctionParams" expectedTypes) (TData "GivenArgs" ts)
 
       
     -- | zipWith (==) (paramType fParams) 

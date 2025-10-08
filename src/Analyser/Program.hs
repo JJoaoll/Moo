@@ -116,7 +116,7 @@ checkGlobal :: Context -> GlobalDef -> Either Error ()
 ctx `checkGlobal` Global{..} = do
   exprType <- ctx `checkExpr` ELit gExpr
   ctx `checkType` gType 
-  unless (gType == exprType) $ Left Error
+  unless (gType == exprType) $ Left $ TypeMismatch gType exprType
 
 -- | Check a constant definition.
 --
@@ -132,7 +132,7 @@ ctx `checkGlobal` Global{..} = do
 checkConst :: Context -> ConstDef -> Either Error ()
 ctx `checkConst` Const{..} = do
     kType' <- ctx `checkExpr` ELit kVal
-    unless (kType' == kType) (Left Error)
+    unless (kType' == kType) (Left $ TypeMismatch kType kType')
 
 
   

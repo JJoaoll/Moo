@@ -2,6 +2,7 @@
 -- {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE DuplicateRecordFields #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 {-|
 Module      : Analyser.TypeDef
@@ -97,16 +98,16 @@ checkConstr c ps ts = do
     case param of
       TVar name -> --inline it please
         unless (name `elem` ps) 
-          (Left Error)
+          (Left $ UnboundTypeVar name)
 
       TData typeName typeArgs -> 
         -- 1. does the type exist? 
         case findType typeName ts of
-          Nothing -> Left Error
+          Nothing -> Left $ TypeNotFound typeName
           Just t -> 
         -- 2. how much args should it recieve?
             if length (tParams t) /= length typeArgs then
-              Left Error
+              Left $ TypeArityMismatch typeName (length $ tParams t) (length typeArgs)
             else 
               checkTypeArgs typeArgs ps ts
 
@@ -127,15 +128,15 @@ checkTypeArgs :: [Type] -> [Name] -> [TypeDef] -> Either Error ()
 checkTypeArgs [] _ _ = pure ()
 checkTypeArgs (t:ts) typeParams typeDefs = do
   case t of
-    TVar name -> unless (name `elem` typeParams) (Left Error)
+    TVar name -> unless (name `elem` typeParams) (Left $ UnboundTypeVar name)
     TData typeName typeArgs ->
       -- 1. does the type exist? 
       case findType typeName typeDefs of
-        Nothing -> Left Error
+        Nothing -> Left $ TypeNotFound typeName
         Just t' -> 
             -- 2. how much args should it recieve?
             if length (tParams t') /= length typeArgs then
-              Left Error
+              Left $ TypeArityMismatch typeName (length $ tParams t') (length typeArgs)
             else do
               _ <- checkTypeArgs typeArgs typeParams typeDefs
               pure ()

@@ -82,7 +82,7 @@ checkECase ctx (pttrn, expr) pttrnType exprType = do
   if t == exprType then 
     pure Ok
   else
-    Left Error -- TODO: Msg
+    Left $ TypeMismatch exprType t
 
 -- | Check that a pattern matches the expected type.
 --
@@ -114,7 +114,7 @@ checkPattern _ (PLit lit) expectedType =
     (LInt   _, TInt)    -> pure Ok
     (LChar  _, TChar)   -> pure Ok
     (LFloat _, TFloat)  -> pure Ok
-    _ -> Left Error -- TODO: Error msg
+    _ -> Left LiteralTypeMismatch
 
 -- | Check constructor pattern against data type.
 --
@@ -131,18 +131,20 @@ checkPattern _ (PLit lit) expectedType =
 -- sla se funfa :P
 checkPattern ctx (PConstructor constrName pttrns) (TData name ts) = 
   case ctx `findConstrAndTypeDefsByName` constrName of
-    Nothing -> Left $ PatternNotFound constrName
+    Nothing -> Left $ ConstrNotFound constrName
     Just (ConstrDef{cParams}, TypeDef{tName, tParams})  -- verifiquei os tamnhos certos? e o ts?
-      | tName /= name                   -> Left Error -- TODO: Error Msg
-      | length pttrns  /= length cParams -> Left Error -- TODO: Error Msg
-      | length tParams /= length ts            -> Left Error -- TODO: Error Mstg
+      | tName /= name                   -> Left $ WrongConstrType constrName tName name
+      | length pttrns  /= length cParams -> 
+          Left $ IncorrectArity constrName (length cParams) (length pttrns)
+      | length tParams /= length ts -> 
+          Left $ TypeArityMismatch tName (length tParams) (length ts)
       -- case everythings ok:
       | otherwise -> do
           case unifyTParams (TVar <$> tParams) ts cParams of
-            Nothing -> Left Error
+            Nothing -> Left TypeUnificationFailed
             Just ts' ->
               forM_ (zip pttrns ts') $ \(pttrn, expectedType)-> do 
                 checkPattern ctx pttrn expectedType
 
           pure Ok
-checkPattern _ _ _ = Left Error -- TODO Msg
+checkPattern _ _ _ = Left PatternTypeMismatch

@@ -106,15 +106,15 @@ ctx `checkSttm` (SInit name typε expr) = do
     ctx `checkType` typε 
     addDecl name typε ctx -- missing to check TODO
   else
-    Left Error -- TODO: incompatible types
+    Left $ TypeMismatch typε exprType
 
 ctx `checkSttm` (SAtrib name expr) = do
   exprType <- ctx `checkExpr` expr
   case ctx `findDecl` name of
-    Nothing -> Left Error
+    Nothing -> Left $ VarNotFound name
     Just Decl{dclType} 
       | dclType == exprType -> pure ctx
-      | otherwise -> Left Error
+      | otherwise -> Left $ TypeMismatch dclType exprType
   
 ctx `checkSttm` (SPrint expr) = do
   void $ ctx `checkExpr` expr
@@ -123,14 +123,14 @@ ctx `checkSttm` (SPrint expr) = do
 ctx `checkSttm` (SGtrib name expr) = do
   exprType <- ctx `checkExpr` expr
   case ctx `findGlobalDef` name of
-    Nothing -> Left Error
+    Nothing -> Left $ GlobalNotFound name
     Just Global{gType} 
       | gType == exprType -> pure ctx
-      | otherwise -> Left Error
+      | otherwise -> Left $ TypeMismatch gType exprType
   
 ctx `checkSttm` (SFunCall fName fArgs) = do
   case ctx `findFunDef` fName of
-    Nothing -> Left Error
+    Nothing -> Left $ FunNotFound fName
     Just f -> ctx <$ handleFun ctx f fArgs
   
 ctx `checkSttm` (SMatch scrutinee cases) = do
@@ -145,7 +145,7 @@ ctx `checkSttm` (SMatch scrutinee cases) = do
 ctx `checkSttm` (SWhile cond body) = do 
   condType <- ctx `checkExpr` cond
   if condType /= TBool then
-    Left Error
+    Left $ ConditionNotBool condType
   else 
     ctx <$ foldM checkSttm (enterBlock ctx) body
 
@@ -155,11 +155,11 @@ ctx `checkSttm` (SFor i is body) = do
     TList a -> do
       newCtx <- ctx & enterBlock & addDecl i a
       ctx <$ foldM checkSttm newCtx body
-    _ -> Left Error
+    _ -> Left $ NotIterableType lType
 
 ctx `checkSttm` (SReturn expr) = do
   exprType <- ctx `checkExpr` expr
   if (ctx ^. getRtrnType) == exprType then
     pure ctx
   else
-    Left Error
+    Left $ TypeMismatch (ctx ^. getRtrnType) exprType

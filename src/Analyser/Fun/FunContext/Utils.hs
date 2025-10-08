@@ -80,12 +80,13 @@ import qualified Analyser.Context.Utils as Ctx
 -- Uses the global context for type definition lookup.
 -- concrete: 👍; abstract: 👎;
 checkType :: FunContext -> Type -> Either Error ()
-checkType _ (TVar _) = Left Error
+checkType _ (TVar name) = Left $ UnboundTypeVar name
 ctx `checkType` (TData tName tArgs) = do
   case ctx `findTypeDef` tName of 
-    Nothing -> Left Error
+    Nothing -> Left $ TypeNotFound tName
     Just TypeDef{tParams} 
-      | L.length tArgs /= L.length tParams -> Left Error
+      | L.length tArgs /= L.length tParams -> 
+          Left $ TypeArityMismatch tName (L.length tParams) (L.length tArgs)
       | otherwise -> forM_ tArgs (ctx `checkType`)
 checkType _ _ = pure ()
 
@@ -110,7 +111,7 @@ addDecl name t funCtx =
     alreadyExists = L.any ((==name) . dclName) currentScope
   in 
     if alreadyExists then
-      Left Error
+      Left $ DuplicateDecl name
     else if ctxLevel == 0 then
       let ctxDecls = (newDecl : d) :| ds in
         pure $ funCtx & getStack .~ ctxDecls  
@@ -119,7 +120,7 @@ addDecl name t funCtx =
         (before, current:after) ->
           let updatedScope = newDecl : current
           in Right $ funCtx & getStack .~ d :| (before ++ [updatedScope] ++ after)  -- LENS
-        _ -> Left Error -- unreachable case
+        _ -> Left $ Error -- unreachable case - internal error
 
 enterBlock :: FunContext -> FunContext
 enterBlock funCtx = 

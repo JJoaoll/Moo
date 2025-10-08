@@ -69,11 +69,11 @@ data ProgramDef
 
 -- | Parse any single top-level definition
 programDef :: Parser ProgramDef
-programDef = choice  
-  [ try $ PDType   <$> TypeDef.typeDef
-  , try $ PDGlobal <$> GlobalDef.globalDef
-  , try $ PDConst  <$> ConstDef.constDef
-  , try $ PDFun    <$> FunDef.funDef
+programDef = choice $ try . lexeme <$>
+  [ PDType   <$> TypeDef.typeDef
+  , PDGlobal <$> GlobalDef.globalDef
+  , PDConst  <$> ConstDef.constDef
+  , PDFun    <$> FunDef.funDef
   ]
 
 -- | Validate and add a definition to the program

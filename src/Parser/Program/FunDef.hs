@@ -17,19 +17,19 @@ import qualified Parser.Sttm as Sttm
 funDef :: Parser FunDef
 funDef = do
   _ <- keyword "fun"
-  name <- lexeme camelCase
+  name <- lexeme camelCase <?> "func name"
 
-  _ <- symbol "("
-  params <- param `sepBy` symbol ","
-  _ <- symbol ")"
+  _ <- symbol "("                    <?> "open parens"
+  params <- param `sepBy` symbol "," <?> "args"
+  _ <- symbol ")"                    <?> "close parens"
 
-  _ <- symbol "->"
-  returnType <- Type.typε
+  _ <- symbol "->"                   <?> "arrow \"->\""
+  returnType <- Type.typε            <?> "return type"
 
-  _ <- keyword "do"
-  body <- Sttm.sttms
+  _ <- keyword "do"                  <?> "\"do\" keyword"
+  body <- Sttm.sttms                 <?> "body"
 
-  _ <- keyword $ "end-" `mappend` name
+  _ <- keyword ("end-" `mappend` name) <?> "end with right name"
   pure $ FunDef name params returnType body
 
 -- | Parse function parameter: x: Int

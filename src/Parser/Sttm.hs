@@ -33,7 +33,7 @@ sttm = choice $ try <$>
 
 -- | Parse multiple statements
 sttms :: Parser Sttms
-sttms = some sttm
+sttms = many sttm
 -- sttms = many sttm
 
 -- ============================================================

@@ -1,6 +1,7 @@
 -- {-# LANGUAGE RecordWildCards #-}
 -- {-# LANGUAGE PartialTypeSignatures #-}
 {-# LANGUAGE NamedFieldPuns #-}
+{-# LANGUAGE OverloadedStrings #-}
 
 {-|
 Module      : Analyser.Fun.Expr
@@ -102,31 +103,33 @@ ctx `checkExpr` (ELit lit) =
     LFloat _ -> pure TFloat
     LConstr name lits -> 
       case ctx `findConstrAndTypeDefsByName` name of
-        Nothing -> Left Error
+        Nothing -> Left $ ConstrNotFound name
         Just (ConstrDef{cParams}, TypeDef{tName, tParams})
-          | length cParams /= length lits -> Left Error
+          | length cParams /= length lits -> 
+              Left $ IncorrectArity name (length cParams) (length lits)
           | otherwise -> do
               tLits <- forM lits $ \lit' -> do
                 ctx `checkExpr` ELit lit'
 
               -- TODO: Lifing
               case unifyTParams (TVar <$> tParams) tLits cParams of
-                Nothing -> Left Error
+                Nothing -> Left TypeUnificationFailed
                 Just ts -> pure $ TData tName ts
             
 
 ctx `checkExpr` (EConstr name args) = 
   case ctx `findConstrAndTypeDefsByName` name of
-    Nothing -> Left Error
+    Nothing -> Left $ ConstrNotFound name
     Just (ConstrDef{cParams}, TypeDef{tName, tParams}) 
-      | length cParams /= length args -> Left Error
+      | length cParams /= length args -> 
+          Left $ IncorrectArity name (length cParams) (length args)
       | otherwise -> do
           tLits <- forM args $ \arg -> do
             ctx `checkExpr` arg
 
           -- TODO: Lifing
           case unifyTParams (TVar <$> tParams) tLits cParams of
-            Nothing -> Left Error
+            Nothing -> Left TypeUnificationFailed
             Just ts -> pure $ TData tName ts
 
 -- | Variable lookup in function context (key difference from global context).
@@ -146,14 +149,14 @@ ctx `checkExpr` (EVar name) =
 -- pre-process :PP TODO: -- maybe the parser?? no
 ctx `checkExpr` (EConst name) = 
   case ctx `findConstDef` name of 
-    Nothing -> Left Error
+    Nothing -> Left $ ConstNotFound name
     Just (Const{kType}) ->       
       pure kType
 
 -- | Global variable lookup (delegates to global context).
 ctx `checkExpr` (EGlobal name) = 
   case ctx `findGlobalDef` name of 
-    Nothing -> Left Error
+    Nothing -> Left $ GlobalNotFound name
     Just (Global{gType}) ->       
       pure gType
 
@@ -162,7 +165,8 @@ checkExpr ctx (EUnOp op expr) = do
   case (op, t) of 
     (Neg, TInt)  -> pure TInt
     (Not, TBool) -> pure TBool
-    _ -> Left Error -- TODO: Msg
+    (Neg, actualType) -> Left $ TypeMismatch TInt actualType
+    (Not, actualType) -> Left $ TypeMismatch TBool actualType
 
 -- improve typeErrors
 checkExpr ctx (EBinOp lExpr op rExpr) = do
@@ -183,7 +187,7 @@ checkExpr ctx (EBinOp lExpr op rExpr) = do
       | op `elem` boolBinOps -> pure TBool
     (TList a, TList b)
       | a == b && op `elem` listBinOps -> pure (TList a)
-    _ -> Left Error
+    _ -> Left $ TypeMismatch tL tR
       
 checkExpr ctx (EFunCall fName args) = 
   case ctx `findFunDef` fName of
@@ -198,9 +202,9 @@ checkExpr ctx (EScan typε) =
     TChar   -> pure TChar
     TFloat  -> pure TFloat
     (TData tName _) -> case ctx `findTypeDef` tName of
-                           Nothing -> Left Error
+                           Nothing -> Left $ TypeNotFound tName
                            Just _  -> pure typε
-    _ -> Left Error
+    _ -> Left $ UnboundTypeVar "Cannot scan type with unbound type variables"
 
 
 
@@ -210,10 +214,11 @@ handleFun :: FunContext -> FunDef -> [Expr] -> Either Error Type
 handleFun ctx FunDef{fName, fParams, rtrType} args 
   | length fParams == length args = do
       ts <- forM args (ctx `checkExpr`) 
-      if ts == (pType <$> fParams) then
+      let expectedTypes = pType <$> fParams
+      if ts == expectedTypes then
         pure rtrType 
       else
-        Left Error -- TODO: Improve this Error!
+        Left $ TypeMismatch (TData "FunctionParams" expectedTypes) (TData "GivenArgs" ts)
 
   | otherwise = Left $
      IncorrectArity fName 
