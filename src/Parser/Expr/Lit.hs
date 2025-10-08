@@ -46,8 +46,8 @@ litFloat = lexeme $ fmap LFloat $
      
 
 litConstr = 
-  try simpleC <|>
-  complexC
+  try complexC <|>
+  simpleC
 
 simpleC, complexC :: Parser Lit
 
