@@ -350,6 +350,6 @@ This project is licensed under the **MIT License** - see the [LICENSE](LICENSE) 
 
 **Built with ❤️ and Haskell**
 
-*Moo - Where imperative meets good* 🐄
+*Moo - Where imperative meeeeeeets good* 🐐
 
 </div>
