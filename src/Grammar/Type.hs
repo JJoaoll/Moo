@@ -142,18 +142,18 @@ data ConstrDef = ConstrDef
 -}
 
 -- | Empty type (no values)
-pattern TEmpty = TData "TEmpty" []
+pattern TEmpty = TData "Empty" []
 -- | Unit type (single value)  
-pattern TOne   = TData "TOne" []
+pattern TOne   = TData "One" []
 -- | Boolean type
-pattern TBool  = TData "TBool" []
+pattern TBool  = TData "Bool" []
 
 -- | Tuple type constructor (product type)
-pattern TTuple x y = TData "TTuple" [x, y]
+pattern TTuple x y = TData "Tuple" [x, y]
 -- | Optional type constructor (sum type)
-pattern TOption x  = TData "TOption" [x]
+pattern TOption x  = TData "Option" [x]
 -- | List type constructor (recursive type)
-pattern TList x    = TData "TList" [x]
+pattern TList x    = TData "List" [x]
 
 {-
   TypeDef Patterns:

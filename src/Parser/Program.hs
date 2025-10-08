@@ -2,7 +2,7 @@
 
 module Parser.Program where
 
-import Grammar.Type (TypeDef(..), ConstrDef(..))
+import Grammar.Type 
 import Utils (Name)
 
 import Text.Megaparsec
@@ -18,9 +18,18 @@ import qualified Parser.Program.TypeDef as TypeDef
 import qualified Parser.Program.FunDef as FunDef
 import Grammar.Program
 
+nativeTypes :: [TypeDef]
+nativeTypes = 
+  [ TDefEmpty
+  , TDefOne
+  , TDefBool
+  , TDefOption
+  , TDefTuple
+  , TDefList ]
+
 -- | Empty program to use as accumulator
 emptyProgram :: Program
-emptyProgram = Program [] [] [] []
+emptyProgram = Program [] [] [] nativeTypes
 
 -- | Built-in type names that cannot be redefined
 builtinTypes :: [Name]
