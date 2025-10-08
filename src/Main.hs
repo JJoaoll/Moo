@@ -22,6 +22,7 @@ import qualified Analyser.Program as AP
 
 -- AI GENERATED Example!
 
+-- TODO: remove it..
 nativeTypes :: [TypeDef]
 nativeTypes = 
   [ TDefEmpty
