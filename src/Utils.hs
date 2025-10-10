@@ -5,12 +5,8 @@ import Data.Text
 -- type Name = String
 type Name = Text
 
--- infixl 1 |>
+(|>) :: t1 -> (t1 -> t2) -> t2
+x |> f = f x
 
--- use & instead
--- (|>) :: α -> (α-> β) -> β
--- x |> f = f x
-
--- use . instead
--- (||>) :: (α -> β) -> (β -> γ) -> α -> γ
--- f ||> g = g . f
+(||>) :: (a -> b) -> (b -> c) -> a -> c
+f ||> g = g . f

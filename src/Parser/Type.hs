@@ -2,42 +2,39 @@
 
 module Parser.Type where
 
-import Text.Megaparsec (try, sepBy, (<|>), choice, (<?>))
+import Text.Megaparsec (try, sepBy, (<|>), choice)
 import Text.Megaparsec.Char (string)
-import Grammar.Type ( Type(TData, TInt, TChar, TFloat) )
-import Data.Text ( Text )
+import Grammar.Type
+import Data.Text
 
-import Parser.Utils.Utils (symbol, lexeme, Parser)
+import Parser.Utils.Utils
 import Parser.Utils.Cases (pascalCase)
 
-typε :: Parser Type 
-typε = lexeme $
-  try primitive <|> custom
+pTypeName :: Parser Text
+pTypeName = pascalCase
 
-primitive :: Parser Type
-primitive = choice
-  [ string "Int"   >> pure TInt
-  , string "Char"  >> pure TChar
-  , string "Float" >> pure TFloat
-  ] 
+pPrimitiveType :: Parser Type
+pPrimitiveType = choice
+    [ string "Int"   >> return TInt
+    , string "Char"  >> return TChar
+    , string "Float" >> return TFloat
+    ]
 
-custom :: Parser Type
-custom = (try complex <|> simple) <?> "Custom Type"
+pSpecialType :: Parser Type
+pSpecialType = do
+    nome <- pTypeName
+    return (TData nome [])
 
-simple :: Parser Type
-simple = TData <$> name <*> pure []
--- simple = do
---   tName <- name
---   pure $ TData tName []
+pSimpleType :: Parser Type
+pSimpleType = try pPrimitiveType <|> pSpecialType
 
-complex :: Parser Type
-complex = do
-  tName <- name
-  _ <- symbol "("
-  tArgs <- typε `sepBy` symbol ","
-  _ <- symbol ")"
+pComplexType :: Parser Type
+pComplexType = do
+    nome <- pTypeName
+    _ <- symbol "("
+    tipos <- pType `sepBy` symbol ","
+    _ <- symbol ")"
+    return (TData nome tipos)
 
-  pure $ TData tName tArgs
-
-name :: Parser Text
-name = lexeme pascalCase
+pType :: Parser Type
+pType = try pComplexType <|> pSimpleType
