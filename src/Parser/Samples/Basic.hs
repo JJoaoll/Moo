@@ -2,7 +2,7 @@
 
 module Parser.Samples.Basic where
 
-import Data.Text hiding (empty)
+import Data.Text hiding (empty, elem)
 import Text.Megaparsec
 import Grammar.Expr 
 
@@ -11,6 +11,8 @@ import Parser.Samples.Ids
 import Parser.Utils.Cases (kebabCase)
 
 import Control.Monad (void)
+
+reservedWords = []
 
 run :: Text -> IO Expr
 run input = 
@@ -30,25 +32,26 @@ pExpr = choice
 
 pLit, pVar, pConst, pGlobal, pUnOp, pBinOp, pFunCall :: Parser Expr
 pLit = undefined
-pVar     = EVar <$> varId
-pConst = do 
-  void $ symbol "<"
-  name <- kebabCase <?> "kebab-case"
-  void $ symbol ">"
+pVar = do
+  varName <- varId
+  if varName `elem` reservedWords then
+    empty
+  else
+    return (EVar varName)
 
-  return (EConst name)
+pConst = EConst <$> constId
 
 -- EGlobal inside the result value of varId read(red) after the symbol "@"
 pGlobal = EGlobal <$> varId <* symbol "@"
 
 pUnOp = undefined
 
-pBinOp   = undefined
+pBinOp = undefined
 
 pFunCall = do
   fName <- funId
   void $ symbol "("
-  fArgs <- pArgs
+  fArgs <- pArgs <?> "function arguments"
   void $ symbol ")"
 
   return (EFunCall fName fArgs)

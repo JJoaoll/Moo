@@ -6,7 +6,7 @@ import Grammar.Type
 import Utils (Name)
 
 import Text.Megaparsec
-import Control.Monad (when)
+import Control.Monad (when, foldM)
 import qualified Data.Text as T
 import Data.List (find)
 import Prelude hiding (const)
@@ -48,16 +48,20 @@ reservedFunctions = []
 program :: Parser Program
 program = do
   sc  -- consume initial whitespace
-  prog <- parseDefinitions emptyProgram
+  --prog <- CHANGE1 parseDefinitions emptyProgram
+  defs <- many programDef -- parse all definitions first
   eof
+
+  -- CHANGE2 Then validate and accumulate them
+  foldM (flip validateAndAdd) emptyProgram defs
   
   -- Reverse is another option to to maintain original order (we prepend during parsing)
   -- for future debugging..
-  pure $ Program 
-    (pGlobals prog)
-    (pConsts prog)
-    (pFuns prog)
-    (pTypes prog)
+  --pure $ Program 
+    --(pGlobals prog)
+    --(pConsts prog)
+    --(pFuns prog)
+    --(pTypes prog)
 
 -- | Parse definitions in any order, accumulating and validating
 parseDefinitions :: Program -> Parser Program
@@ -78,12 +82,13 @@ data ProgramDef
 
 -- | Parse any single top-level definition
 programDef :: Parser ProgramDef
-programDef = choice $ try . lexeme <$>
+--programDef = choice $ try . lexeme <$>
+programDef = lexeme (choice
   [ PDType   <$> TypeDef.typeDef
   , PDGlobal <$> GlobalDef.globalDef
   , PDConst  <$> ConstDef.constDef
   , PDFun    <$> FunDef.funDef
-  ]
+  ] <?> "program definition (type, global, const, or function)") --CHANGE3
 
 -- | Validate and add a definition to the program
 validateAndAdd :: ProgramDef -> Program -> Parser Program

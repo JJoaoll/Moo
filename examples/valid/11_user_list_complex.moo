@@ -18,13 +18,13 @@ fun main() -> Int do
     let acress: Float := scan!(Float)
 
     us := acressAllSals(us, acress)
-    let usRec: List(User) := acressAllSalsRec(us, acress)
+    let usrec: List(User) := acressAllSalsRec(us, acress)
 
     print(us)
-    print(usRec)
+    print(usrec)
 
     // missing strings in the lang..
-    match us == usRec with
+    match us == usrec with
         case True do
             print(0)
         end-case
@@ -38,17 +38,17 @@ fun main() -> Int do
 end-main
 
 fun acressAllSals(users: List(User), accress: Float) -> List(User) do
-    let newUsers := Nil
+    let newusers := Nil
     for user in users do
         match user with
             case User(age, rent) do
                 // silly thing just for trying the cat
-                newUsers := Cons(User(age, rent+acress), Nil) ++ newUsers 
+                newusers := Cons(User(age, rent+acress), Nil) ++ newusers 
             end-case
         end-match
     end-for
 
-    return newUsers
+    return newusers
 end-acressAllSals
 
 fun acressAllSalsRec(users: List(User), accress: Float) -> List(User) do
