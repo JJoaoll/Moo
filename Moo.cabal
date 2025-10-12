@@ -81,20 +81,6 @@ executable Moo
         , Parsing.Lexer
         , Parsing.Parser
         , Parsing.MooParser
-        -- Parser (old Megaparsec version - to be phased out)
-        , Parser.Expr
-        , Parser.Expr.Lit
-        , Parser.Program
-        , Parser.Program.ConstDef
-        , Parser.Program.FunDef
-        , Parser.Program.GlobalDef
-        , Parser.Program.TypeDef
-        , Parser.Samples.Basic
-        , Parser.Samples.Ids
-        , Parser.Sttm
-        , Parser.Type
-        , Parser.Utils.Cases
-        , Parser.Utils.Utils
         -- Analyser (Type checker)
         , Analyser.Context.Def
         , Analyser.Context.Expr

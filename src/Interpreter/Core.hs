@@ -18,8 +18,8 @@ import Utils
 import Data.Text (Text)
 import qualified Data.Text.IO as TIO
 -- import qualified System.IO as IO
-import Text.Megaparsec (runParser)
-import Parser.Expr.Lit (literal)
+-- import Text.Megaparsec (runParser)
+-- import Parser.Expr.Lit (literal)
 import Grammar.Sttm
 import qualified System.IO as IO
 import Grammar.Program
@@ -321,10 +321,10 @@ evalExpr (EScan typε) = do
   where
     errorMsg = error $ "wrong input! Expecting something from type: " ++ show typε
     parseLiteral :: Text -> Maybe Lit
-    parseLiteral input =
-      case runParser literal "" input of
-        Right lit -> Just lit
-        Left _    -> Nothing
+    parseLiteral _ = Nothing  -- TODO: Implement literal parsing without Megaparsec
+      -- case runParser literal "" input of
+      --   Right lit -> Just lit
+      --   Left _    -> Nothing
 
 evalExpr (EConst cName) = error $ 
   "Parsing internal problem: "

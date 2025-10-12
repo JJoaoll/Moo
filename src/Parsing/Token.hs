@@ -20,7 +20,7 @@ data TokenClass
   -- Keywords
   = TkFun
   | TkEnd
-  | TkEndNamed Text  -- end-<name> for function/type definitions
+  | TkEndNamed Text  -- end-<name> captures the name for validation
   | TkDo
   | TkReturn
   | TkLet

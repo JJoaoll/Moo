@@ -30,14 +30,12 @@ $digit = 0-9
 $alpha = [a-zA-Z]
 $lower = [a-z]
 $upper = [A-Z]
-$digit = [0-9]
 $alphaNum = [a-zA-Z0-9]
 
--- Identifiers (BOTH can match all-lowercase - context decides!)
--- snakeCase: lowercase + (lowercase|digit|underscore)* - for VARIABLES
-@snakeCase = $lower ($lower | $digit | \_)*
--- camelCase: lowercase + (alphaNum)* but NO underscore - for FUNCTIONS
-@camelCase = $lower $alphaNum*
+-- Identifiers
+@lowercase  = $lower+
+@snakeCase  = $lower ($lower | $digit | \_)*
+@camelCase  = $lower $alphaNum*
 @pascalCase = $upper $alphaNum*
 
 tokens :-
@@ -50,14 +48,14 @@ tokens :-
 
   -- Keywords (order matters - longer matches first!)
   "otherwise"                           { \_ -> Tok.TkOtherwise }
+  "@global"                             { \_ -> Tok.TkGlobal }
   "<const>"                             { \_ -> Tok.TkConst }
-  "global"                              { \_ -> Tok.TkGlobal }
   "end-match"                           { \_ -> Tok.TkEnd }
   "end-case"                            { \_ -> Tok.TkEnd }
   "end-while"                           { \_ -> Tok.TkEnd }
   "end-for"                             { \_ -> Tok.TkEnd }
   "end-def"                             { \_ -> Tok.TkEnd }
-  "end-" @camelCase                     { \s -> Tok.TkEndNamed (T.pack $ drop 4 s) }
+  "end-"@lowercase                      { \s -> Tok.TkEndNamed (T.pack $ drop 4 s) }
   "scan!"                               { \_ -> Tok.TkScan }
   "fun"                                 { \_ -> Tok.TkFun }
   "return"                              { \_ -> Tok.TkReturn }
@@ -117,15 +115,14 @@ tokens :-
   
   -- Literals
   $digit+\.$digit+                      { \s -> Tok.TkFloat (read s) }
-  $digit+\.                             { \s -> Tok.TkFloat (read (s ++ "0")) }  -- 3. → 3.0
   $digit+                               { \s -> Tok.TkInt (read s) }
   \' ([^\'] | \\\') \'                  { \s -> Tok.TkChar (parseChar s) }
   \" ([^\"] | \\\")* \"                 { \s -> Tok.TkString (T.pack $ parseString s) }
   
-  -- Identifiers (order matters: most specific first!)
+  -- Identifiers (case-sensitive patterns - ORDER MATTERS!)
   @pascalCase                           { \s -> Tok.TkPascalId (T.pack s) }
-  @camelCase                            { \s -> Tok.TkCamelId (T.pack s) }
   @snakeCase                            { \s -> Tok.TkSnakeId (T.pack s) }
+  @lowercase                            { \s -> Tok.TkSnakeId (T.pack s) }  -- Generic lowercase for both vars and funs
 
 {
 -- | Parse character literal (handles escapes)

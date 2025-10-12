@@ -5,15 +5,9 @@
 Module      : Parsing.Parser
 Description : Happy-generated parser for Moo language
 Copyright   : (c) 2025 Moo Language Team
-License   globalDef :: { GlobalDef }
-globalDef
-  : '@' CAMEL ':' typeExpr ':=' literal
-      { GlobalDef $2 $4 $6 }
+License     : MIT
 
-constDef :: { ConstDef }
-constDef
-  : '<const>' CAMEL ':' typeExpr ':=' literal
-      { ConstDef $2 $4 $6 }Parser for the Moo programming language, generating an AST
+Parser for the Moo programming language, generating an AST
 from a token stream produced by the Alex lexer.
 -}
 
@@ -30,7 +24,6 @@ import Grammar.Program
 import Grammar.Type
 import Grammar.Expr
 import Grammar.Sttm
-import Data.Char (toLower)
 }
 
 %name parseProgram program
@@ -56,7 +49,7 @@ import Data.Char (toLower)
   in          { Token _ TkIn }
   print       { Token _ TkPrint }
   scan        { Token _ TkScan }
-  global      { Token _ TkGlobal }
+  '@global'   { Token _ TkGlobal }
   '<const>'   { Token _ TkConst }
   
   -- Logical
@@ -150,11 +143,6 @@ typeDef :: { TypeDef }
 typeDef
   : type PASCAL typeParams def constructors end
       { TypeDef $2 $3 $5 }
-  | type PASCAL typeParams def constructors ENDNAMED
-      { if T.map toLower $2 == T.map toLower $6 || $6 == "def"
-        then TypeDef $2 $3 $5
-        else error $ "Type end name mismatch: expected 'end-def' but got 'end-" ++ T.unpack $6 ++ "'"
-      }
 
 typeParams :: { [Name] }
 typeParams
@@ -163,9 +151,7 @@ typeParams
 
 typeParamList :: { [Name] }
 typeParamList
-  : CAMEL                               { [$1] }
-  | SNAKE                               { [$1] }
-  | CAMEL ',' typeParamList             { $1 : $3 }
+  : SNAKE                               { [$1] }
   | SNAKE ',' typeParamList             { $1 : $3 }
 
 constructors :: { [ConstrDef] }
@@ -184,16 +170,12 @@ constructor
 
 globalDef :: { GlobalDef }
 globalDef
-  : '@' global CAMEL ':' typeExpr ':=' literal
-      { Global $3 $5 $7 }
-  | '@' global SNAKE ':' typeExpr ':=' literal
-      { Global $3 $5 $7 }
+  : '@global' SNAKE ':' typeExpr ':=' literal
+      { Global $2 $4 $6 }
 
 constDef :: { ConstDef }
 constDef
-  : '<const>' CAMEL ':' typeExpr ':=' literal
-      { Const $2 $4 $6 }
-  | '<const>' SNAKE ':' typeExpr ':=' literal
+  : '<const>' SNAKE ':' typeExpr ':=' literal
       { Const $2 $4 $6 }
 
 -- ============================================================
@@ -203,8 +185,9 @@ constDef
 funDef :: { FunDef }
 funDef
   : fun funName '(' params ')' '->' typeExpr do stmts ENDNAMED
-      { FunDef $2 $4 $7 $9 }
-      -- TODO: Validate that ENDNAMED value matches function name
+      { FunDef $2 $4 $7 $10 $9 }
+  | fun funName '(' params ')' '->' typeExpr do stmts end
+      { FunDef $2 $4 $7 "" $9 }
 
 funName :: { Name }
 funName
@@ -223,8 +206,7 @@ paramList
 
 param :: { Param }
 param
-  : CAMEL ':' typeExpr                  { Param $1 $3 }
-  | SNAKE ':' typeExpr                  { Param $1 $3 }
+  : SNAKE ':' typeExpr                  { Param $1 $3 }
 
 -- ============================================================
 -- TYPES
@@ -234,7 +216,6 @@ typeExpr :: { Type }
 typeExpr
   : PASCAL                              { parseType $1 [] }
   | PASCAL '(' typeList ')'             { parseType $1 $3 }
-  | CAMEL                               { TVar $1 }
   | SNAKE                               { TVar $1 }
 
 typeList :: { [Type] }
@@ -253,18 +234,12 @@ stmts
 
 stmt :: { Sttm }
 stmt
-  : let CAMEL ':' typeExpr ':=' expr    { SInit $2 $4 $6 }
-  | let SNAKE ':' typeExpr ':=' expr    { SInit $2 $4 $6 }
-  | let CAMEL ':=' expr                 { SInit $2 (TVar "_") $4 }  -- Type inference
-  | let SNAKE ':=' expr                 { SInit $2 (TVar "_") $4 }
-  | CAMEL ':=' expr                     { SAtrib $1 $3 }
+  : let SNAKE ':' typeExpr ':=' expr    { SInit $2 $4 $6 }
   | SNAKE ':=' expr                     { SAtrib $1 $3 }
-  | '@' CAMEL ':=' expr                 { SGtrib $2 $4 }
   | '@' SNAKE ':=' expr                 { SGtrib $2 $4 }
   | print '(' expr ')'                  { SPrint $3 }
   | match expr with cases end           { SMatch $2 $4 }
   | while expr do stmts end             { SWhile $2 $4 }
-  | for CAMEL in expr do stmts end      { SFor $2 $4 $6 }
   | for SNAKE in expr do stmts end      { SFor $2 $4 $6 }
   | return expr                         { SReturn $2 }
   | funCall                             { let (n, args) = $1 in SFunCall n args }
@@ -286,7 +261,6 @@ caseClause
 pattern :: { Pattern }
 pattern
   : literal                             { PLit $1 }
-  | CAMEL                               { PVar $1 }
   | SNAKE                               { PVar $1 }
   | '_'                                 { PWildcard }
   | PASCAL                              { PConstructor $1 [] }
@@ -303,23 +277,18 @@ patternList
 
 expr :: { Expr }
 expr
-  -- Literals
+  -- Literals and variables
   : literal                             { ELit $1 }
+  | SNAKE                               { EVar $1 }
+  | '<' SNAKE '>'                       { EConst $2 }
+  | '@' SNAKE                           { EGlobal $2 }
   
-  -- Constructors (before variables to avoid ambiguity)
+  -- Constructors
   | PASCAL                              { EConstr $1 [] }
   | PASCAL '(' exprList ')'             { EConstr $1 $3 }
   
-  -- Function calls (before variables - CAMEL/SNAKE with parens)
+  -- Function calls
   | funCall                             { let (n, args) = $1 in EFunCall n args }
-  
-  -- Variables and other identifiers (both CAMEL and SNAKE)
-  | CAMEL                               { EVar $1 }
-  | SNAKE                               { EVar $1 }
-  | '<' CAMEL '>'                       { EConst $2 }
-  | '<' SNAKE '>'                       { EConst $2 }
-  | '@' CAMEL                           { EGlobal $2 }
-  | '@' SNAKE                           { EGlobal $2 }
   
   -- Scan
   | scan '!' '(' typeExpr ')'           { EScan $4 }
@@ -357,10 +326,8 @@ expr
 
 funCall :: { (Name, [Expr]) }
 funCall
-  : CAMEL '(' ')'                       { ($1, []) }
-  | CAMEL '(' exprList ')'              { ($1, $3) }
-  | SNAKE '(' ')'                       { ($1, []) }
-  | SNAKE '(' exprList ')'              { ($1, $3) }
+  : funName '(' ')'                     { ($1, []) }
+  | funName '(' exprList ')'            { ($1, $3) }
 
 exprList :: { [Expr] }
 exprList

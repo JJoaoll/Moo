@@ -10,16 +10,10 @@ import Control.Monad.State
 import Control.Monad.Except
 import Grammar.Type
 
--- New Parser imports (Alex/Happy)
-import qualified Parsing.Lexer as Lexer
-import qualified Parsing.Parser as Parser
-
--- Old Parser imports (Megaparsec - for comparison)
--- import qualified Parser.Program as PP
--- import Text.Megaparsec (runParser, errorBundlePretty)
+-- Parser imports
+import qualified Parsing.MooParser as Parser
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
-import Control.Exception (catch, SomeException)
 
 -- Analyser imports
 import qualified Analyser.Program as AP 
@@ -47,15 +41,13 @@ initContext Program{..} = Context
   where 
     globalToDVar (Global name _ lit) = DVar name (lit2Val lit)
 
--- | Parse a Moo program from a file using Alex/Happy
+-- | Parse a Moo program from a file
 parseProgram :: FilePath -> IO (Either String Program)
 parseProgram filepath = do
   content <- readFile filepath
-  let tokens = Lexer.scanTokens content
-  case Parser.parseProgram tokens of
-    prog -> pure $ Right prog
-  `catch` \(e :: SomeException) -> do
-    pure $ Left $ show e
+  case Parser.parseString content of
+    Parser.ParseSuccess prog -> pure $ Right prog
+    Parser.ParseError err -> pure $ Left err
 
 main :: IO ()
 main = do

@@ -134,6 +134,7 @@ data Error
   | TypeUnificationFailed          -- ^ Type parameter unification failed
   | NotIterableType Type           -- ^ Type is not iterable
   | ConditionNotBool Type          -- ^ Condition is not boolean
+  | WrongEndName Msg Msg           -- ^ Function name, end-name (expected, actual)
   deriving (Eq, Show)
 
 {-

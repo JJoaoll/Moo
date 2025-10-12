@@ -62,6 +62,8 @@ import Control.Monad
 
 import Analyser.Context.Utils
 
+import qualified Data.Text as T
+
 -- | Check a function definition for type correctness.
 --
 -- Creates a function analysis context and validates all statements in the body:
@@ -83,7 +85,11 @@ import Analyser.Context.Utils
 --
 -- Note: Currently does not guarantee that all execution paths return a value.
 checkFun :: Context -> FunDef -> Either Error ()
-checkFun ctx FunDef{..} = 
+checkFun ctx FunDef{..} = do
+  -- First, validate that end-name matches function name (if provided)
+  when (endName /= T.empty && endName /= fName) $
+    Left $ WrongEndName fName endName
+  
   let 
     initialStack = (paramToDecl <$> fParams) :| []
     funCtx = 
@@ -93,11 +99,11 @@ checkFun ctx FunDef{..} =
         _getLevel    = 0,
         _getRtrnType = rtrType
       }
-  in 
-    -- if returns, returs the right type
-    -- but no garantee that will return something
-    -- without more time to code..
-    foldM_ checkSttm funCtx body
+  
+  -- if returns, returs the right type
+  -- but no garantee that will return something
+  -- without more time to code..
+  foldM_ checkSttm funCtx body
 
 
 
