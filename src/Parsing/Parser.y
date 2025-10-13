@@ -34,7 +34,6 @@ import Grammar.Sttm
   -- Keywords
   fun         { Token _ TkFun }
   end         { Token _ TkEnd }
-  ENDNAMED    { Token _ (TkEndNamed $$) }
   do          { Token _ TkDo }
   return      { Token _ TkReturn }
   let         { Token _ TkLet }
@@ -192,7 +191,6 @@ funDef
 funName :: { Name }
 funName
   : CAMEL                               { $1 }
-  | SNAKE                               { $1 }
 
 params :: { [Param] }
 params

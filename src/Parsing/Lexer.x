@@ -33,7 +33,7 @@ $upper = [A-Z]
 $alphaNum = [a-zA-Z0-9]
 
 -- Identifiers
-@lowercase  = $lower+
+-- @lowercase  = $lower+
 @snakeCase  = $lower ($lower | $digit | \_)*
 @camelCase  = $lower $alphaNum*
 @pascalCase = $upper $alphaNum*
@@ -55,7 +55,7 @@ tokens :-
   "end-while"                           { \_ -> Tok.TkEnd }
   "end-for"                             { \_ -> Tok.TkEnd }
   "end-def"                             { \_ -> Tok.TkEnd }
-  "end-"@lowercase                      { \s -> Tok.TkEndNamed (T.pack $ drop 4 s) }
+  "end-"@snakeCase                      { \s -> Tok.TkEndNamed (T.pack $ drop 4 s) }
   "scan!"                               { \_ -> Tok.TkScan }
   "fun"                                 { \_ -> Tok.TkFun }
   "return"                              { \_ -> Tok.TkReturn }
