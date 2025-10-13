@@ -10,16 +10,13 @@ import Control.Monad.State
 import Control.Monad.Except
 import Grammar.Type
 
--- New Parser imports (Alex/Happy)
-import qualified Parsing.Lexer as Lexer
-import qualified Parsing.Parser as Parser
-
--- Old Parser imports (Megaparsec - for comparison)
--- import qualified Parser.Program as PP
--- import Text.Megaparsec (runParser, errorBundlePretty)
+-- Megaparsec Parser imports
+import Parser.Program (program)
+import Text.Megaparsec (runParser, errorBundlePretty)
 import System.Environment (getArgs)
 import System.Exit (exitFailure)
-import Control.Exception (catch, SomeException)
+import qualified Data.Text.IO as TIO
+import qualified Data.Text as T
 
 -- Analyser imports
 import qualified Analyser.Program as AP 
@@ -47,15 +44,13 @@ initContext Program{..} = Context
   where 
     globalToDVar (Global name _ lit) = DVar name (lit2Val lit)
 
--- | Parse a Moo program from a file using Alex/Happy
+-- | Parse a Moo program from a file using Megaparsec
 parseProgram :: FilePath -> IO (Either String Program)
 parseProgram filepath = do
-  content <- readFile filepath
-  let tokens = Lexer.scanTokens content
-  case Parser.parseProgram tokens of
-    prog -> pure $ Right prog
-  `catch` \(e :: SomeException) -> do
-    pure $ Left $ show e
+  content <- TIO.readFile filepath
+  case runParser program filepath content of
+    Left err -> pure $ Left $ errorBundlePretty err
+    Right prog -> pure $ Right prog
 
 main :: IO ()
 main = do
@@ -63,28 +58,29 @@ main = do
   case args of
     [] -> do
       putStrLn "Usage: Moo <file.moo>"
-      putStrLn "Example: Moo examples/hello.moo"
+      putStrLn "Example: Moo examples/valid/01_simple_function.moo"
       exitFailure
     
     (filepath:_) -> do
+      putStrLn $ "Parser: Megaparsec"
       putStrLn $ "Parsing file: " ++ filepath
       result <- parseProgram filepath
       case result of
         Left err -> do
-          putStrLn "Parse error:"
+          putStrLn "❌ Parse error:"
           putStrLn err
           exitFailure
         
-        Right program -> do
+        Right prog -> do
           putStrLn "✓ Parse successful!"
-          putStrLn $ "  Types: " ++ show (length $ pTypes program)
-          putStrLn $ "  Globals: " ++ show (length $ pGlobals program)
-          putStrLn $ "  Constants: " ++ show (length $ pConsts program)
-          putStrLn $ "  Functions: " ++ show (length $ pFuns program)
+          putStrLn $ "  Types: " ++ show (length $ pTypes prog)
+          putStrLn $ "  Globals: " ++ show (length $ pGlobals prog)
+          putStrLn $ "  Constants: " ++ show (length $ pConsts prog)
+          putStrLn $ "  Functions: " ++ show (length $ pFuns prog)
           
           -- Semantic analysis
           putStrLn "\nAnalysing program..."
-          case AP.checkProgram program of
+          case AP.checkProgram prog of
             Left err -> do
               putStrLn "Analysis error:"
               print err
@@ -93,7 +89,7 @@ main = do
               putStrLn "✓ Analysis successful!"
               
               -- Initialize interpreter context
-              let ctx = initContext program
+              let ctx = initContext prog
               
               -- Run the program
               putStrLn "\nRunning program..."

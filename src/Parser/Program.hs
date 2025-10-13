@@ -62,7 +62,7 @@ program = do
 -- | Parse definitions in any order, accumulating and validating
 parseDefinitions :: Program -> Parser Program
 parseDefinitions prog = do
-  maybeDef <- optional programDef
+  maybeDef <- optional (try programDef)
   case maybeDef of
     Nothing  -> pure prog  -- No more definitions
     Just def -> do
@@ -78,7 +78,7 @@ data ProgramDef
 
 -- | Parse any single top-level definition
 programDef :: Parser ProgramDef
-programDef = choice $ try . lexeme <$>
+programDef = choice $ try <$>
   [ PDType   <$> TypeDef.typeDef
   , PDGlobal <$> GlobalDef.globalDef
   , PDConst  <$> ConstDef.constDef
