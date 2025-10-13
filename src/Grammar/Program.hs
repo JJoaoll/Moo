@@ -118,7 +118,7 @@ data FunDef = FunDef
   { fName   :: Name    -- ^ Function name
   , fParams :: Params  -- ^ Function parameters
   , rtrType :: Type    -- ^ Return type
-  -- , endName :: Name    -- ^ A trash value for name verification (main branch should not have it)
+  , endName :: Name    -- ^ A trash value for name verification (main branch should not have it)
   , body    :: Sttms   -- ^ Function body (list of statements)
   } deriving (Eq, Show)
 

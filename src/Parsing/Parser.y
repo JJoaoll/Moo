@@ -66,6 +66,7 @@ import Grammar.Sttm
   SNAKE       { Token _ (TkSnakeId $$) }
   CAMEL       { Token _ (TkCamelId $$) }
   PASCAL      { Token _ (TkPascalId $$) }
+  ENDNAMED    { Token _ (TkEndNamed $$) }
   
   -- Operators
   '+'         { Token _ TkPlus }
@@ -185,8 +186,8 @@ funDef :: { FunDef }
 funDef
   : fun funName '(' params ')' '->' typeExpr do stmts ENDNAMED
       { FunDef $2 $4 $7 $10 $9 }
-  | fun funName '(' params ')' '->' typeExpr do stmts end
-      { FunDef $2 $4 $7 "" $9 }
+  -- | fun funName '(' params ')' '->' typeExpr do stmts end
+  --     { FunDef $2 $4 $7 "" $9 }
 
 funName :: { Name }
 funName
@@ -277,16 +278,16 @@ expr :: { Expr }
 expr
   -- Literals and variables
   : literal                             { ELit $1 }
+
+  | funCall                             { let (n, args) = $1 in EFunCall n args }
   | SNAKE                               { EVar $1 }
+
   | '<' SNAKE '>'                       { EConst $2 }
   | '@' SNAKE                           { EGlobal $2 }
   
   -- Constructors
   | PASCAL                              { EConstr $1 [] }
   | PASCAL '(' exprList ')'             { EConstr $1 $3 }
-  
-  -- Function calls
-  | funCall                             { let (n, args) = $1 in EFunCall n args }
   
   -- Scan
   | scan '!' '(' typeExpr ')'           { EScan $4 }

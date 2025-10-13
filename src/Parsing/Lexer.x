@@ -55,7 +55,7 @@ tokens :-
   "end-while"                           { \_ -> Tok.TkEnd }
   "end-for"                             { \_ -> Tok.TkEnd }
   "end-def"                             { \_ -> Tok.TkEnd }
-  "end-"@snakeCase                      { \s -> Tok.TkEndNamed (T.pack $ drop 4 s) }
+  "end-"@camelCase                      { \s -> Tok.TkEndNamed }
   "scan!"                               { \_ -> Tok.TkScan }
   "fun"                                 { \_ -> Tok.TkFun }
   "return"                              { \_ -> Tok.TkReturn }
@@ -122,7 +122,6 @@ tokens :-
   -- Identifiers (case-sensitive patterns - ORDER MATTERS!)
   @pascalCase                           { \s -> Tok.TkPascalId (T.pack s) }
   @snakeCase                            { \s -> Tok.TkSnakeId (T.pack s) }
-  @lowercase                            { \s -> Tok.TkSnakeId (T.pack s) }  -- Generic lowercase for both vars and funs
 
 {
 -- | Parse character literal (handles escapes)
